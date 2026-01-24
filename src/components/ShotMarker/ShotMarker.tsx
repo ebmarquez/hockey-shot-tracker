@@ -8,9 +8,12 @@ interface ShotMarkerProps {
 
 const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick }) => {
   const getColor = () => {
+    if (shot.result === 'goal') {
+      // Goals are always bright and prominent
+      return shot.team === 'home' ? 'bg-green-500 ring-4 ring-green-300' : 'bg-blue-500 ring-4 ring-blue-300';
+    }
+    // Regular shots are more subdued
     switch (shot.result) {
-      case 'goal':
-        return shot.team === 'home' ? 'bg-green-500' : 'bg-blue-500';
       case 'save':
         return shot.team === 'home' ? 'bg-yellow-500' : 'bg-cyan-500';
       case 'miss':
@@ -22,10 +25,15 @@ const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick }) => {
     }
   };
 
+  const getSize = () => {
+    // Goals are larger
+    return shot.result === 'goal' ? 'w-8 h-8' : 'w-6 h-6';
+  };
+
   return (
     <div
-      className={`absolute w-6 h-6 rounded-full ${getColor()} border-2 border-white shadow-lg 
-        flex items-center justify-center text-white text-xs font-bold cursor-pointer
+      className={`absolute ${getSize()} rounded-full ${getColor()} border-2 border-white shadow-lg 
+        flex items-center justify-center text-white text-sm font-bold cursor-pointer
         transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto
         hover:scale-125 active:scale-110 transition-transform`}
       style={{
@@ -35,7 +43,7 @@ const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick }) => {
       onClick={() => onClick?.(shot)}
       title={`${shot.team} - ${shot.result} (${shot.shotType})`}
     >
-      {shot.result === 'goal' && '⚫'}
+      {shot.result === 'goal' && <span className="text-lg">⚽</span>}
     </div>
   );
 };
