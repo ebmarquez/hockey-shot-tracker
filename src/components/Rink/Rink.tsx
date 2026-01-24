@@ -1,6 +1,4 @@
-import React, { useRef, useState } from 'react';
-import { getTouchCoordinates, triggerHaptic } from '../../utils/touch';
-import { storage } from '../../utils/storage';
+import React, { useRef } from 'react';
 
 interface RinkProps {
   onShotLocation: (x: number, y: number) => void;
@@ -9,55 +7,6 @@ interface RinkProps {
 
 const Rink: React.FC<RinkProps> = ({ onShotLocation, children }) => {
   const rinkRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-  const [isPinching, setIsPinching] = useState(false);
-  const [initialDistance, setInitialDistance] = useState(0);
-  const [initialScale, setInitialScale] = useState(1);
-
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length === 2) {
-      // Pinch zoom start
-      setIsPinching(true);
-      const distance = getDistance(e.touches[0], e.touches[1]);
-      setInitialDistance(distance);
-      setInitialScale(scale);
-      e.preventDefault();
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length === 2 && isPinching) {
-      // Pinch zoom
-      const distance = getDistance(e.touches[0], e.touches[1]);
-      const newScale = Math.max(1, Math.min(3, initialScale * (distance / initialDistance)));
-      setScale(newScale);
-      e.preventDefault();
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length < 2) {
-      setIsPinching(false);
-    }
-
-    // Single tap for shot location
-    if (e.touches.length === 0 && !isPinching && rinkRef.current) {
-      const coords = getTouchCoordinates(e, rinkRef.current);
-      onShotLocation(coords.x, coords.y);
-      
-      // Haptic feedback
-      const prefs = storage.loadPreferences();
-      if (prefs.hapticFeedback) {
-        triggerHaptic(10);
-      }
-    }
-  };
-
-  const getDistance = (touch1: React.Touch, touch2: React.Touch): number => {
-    const dx = touch1.clientX - touch2.clientX;
-    const dy = touch1.clientY - touch2.clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (rinkRef.current) {
@@ -69,36 +18,21 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children }) => {
         Math.max(0, Math.min(100, x)),
         Math.max(0, Math.min(100, y))
       );
-      
-      // Haptic feedback
-      const prefs = storage.loadPreferences();
-      if (prefs.hapticFeedback) {
-        triggerHaptic(10);
-      }
     }
   };
 
   return (
     <div className="relative w-full">
-      {/* Rink container with team labels */}
-      <div className="relative overflow-hidden rounded-xl border-2 border-slate-300 shadow-lg">
-        <div
-          ref={rinkRef}
-          className="relative select-none touch-none"
-          style={{
-            transform: `scale(${scale})`,
-            transition: isPinching ? 'none' : 'transform 0.2s ease-out',
-          }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onClick={handleClick}
+      <div 
+        ref={rinkRef}
+        className="relative cursor-crosshair"
+        onClick={handleClick}
+      >
+        <svg
+          viewBox="0 0 200 85"
+          className="w-full h-auto pointer-events-none"
+          style={{ maxHeight: '60vh' }}
         >
-          <svg
-            viewBox="0 0 200 85"
-            className="w-full h-auto"
-            style={{ maxHeight: '60vh' }}
-          >
           {/* Ice surface with gradient */}
           <defs>
             <linearGradient id="ice-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -225,7 +159,6 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children }) => {
           {children}
         </div>
       </div>
-    </div>
     </div>
   );
 };
