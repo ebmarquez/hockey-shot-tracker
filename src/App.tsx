@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
+import { useToast } from './context/ToastContext';
 import Rink from './components/Rink/Rink';
 import ShotMarker from './components/ShotMarker/ShotMarker';
 import ShotForm from './components/ShotForm/ShotForm';
@@ -11,6 +12,7 @@ import { calculatePerPeriodStats, formatPeriodLabel, formatPeriodStats } from '.
 
 const GameView: React.FC = () => {
   const { state, startGame, resetGame, setPeriod, selectTeam, setTeamName, addShot, removeShot, undoLastShot } = useGame();
+  const { showToast } = useToast();
   const [pendingLocation, setPendingLocation] = useState<{ x: number; y: number } | null>(null);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -34,6 +36,13 @@ const GameView: React.FC = () => {
     if (pendingLocation) {
       addShot(pendingLocation.x, pendingLocation.y, shotType, result);
       setPendingLocation(null);
+      
+      // Show toast notification
+      if (result === 'goal') {
+        showToast('🎉 GOAL! 🎉', 'celebration', 5000);
+      } else {
+        showToast('Shot recorded', 'success');
+      }
     }
   };
 
@@ -44,6 +53,7 @@ const GameView: React.FC = () => {
   const handleResetGame = () => {
     if (confirm('Reset game? This will clear all shots.')) {
       resetGame();
+      showToast('Game reset', 'info');
     }
   };
 
@@ -93,11 +103,18 @@ const GameView: React.FC = () => {
       removeShot(shotToDelete.id);
       triggerHaptic(20);
       setShotToDelete(null);
+      showToast('Shot deleted', 'warning');
     }
   };
 
   const handleDeleteCancel = () => {
     setShotToDelete(null);
+  };
+
+  const handlePeriodChange = (period: Period) => {
+    setPeriod(period);
+    const periodLabel = period === 'OT' ? 'Overtime' : period === 1 ? '1st Period' : period === 2 ? '2nd Period' : '3rd Period';
+    showToast(`Period changed to ${periodLabel}`, 'info');
   };
 
   if (!state.game) {
@@ -320,7 +337,7 @@ const GameView: React.FC = () => {
               {periods.map((period) => (
                 <button
                   key={period}
-                  onClick={() => setPeriod(period)}
+                  onClick={() => handlePeriodChange(period)}
                   className={`px-5 py-2 rounded-lg font-semibold text-sm min-w-[60px] transition-colors border
                     ${state.game!.currentPeriod === period
                       ? 'bg-blue-600 text-white border-blue-600'
