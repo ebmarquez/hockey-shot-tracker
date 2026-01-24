@@ -11,6 +11,7 @@ type GameAction =
   | { type: 'RESET_GAME' }
   | { type: 'SET_PERIOD'; payload: Period }
   | { type: 'SELECT_TEAM'; payload: Team }
+  | { type: 'SET_TEAM_NAME'; payload: { team: Team; name: string } }
   | { type: 'ADD_SHOT'; payload: Shot }
   | { type: 'REMOVE_SHOT'; payload: string }
   | { type: 'UNDO_LAST_SHOT' }
@@ -24,6 +25,7 @@ interface GameContextType {
   resetGame: () => void;
   setPeriod: (period: Period) => void;
   selectTeam: (team: Team) => void;
+  setTeamName: (team: Team, name: string) => void;
   addShot: (x: number, y: number, shotType: ShotType, result: ShotResult) => void;
   removeShot: (id: string) => void;
   undoLastShot: () => void;
@@ -90,6 +92,18 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'SELECT_TEAM':
       return { ...state, selectedTeam: action.payload };
+
+    case 'SET_TEAM_NAME':
+      if (state.game) {
+        const updatedGame = {
+          ...state.game,
+          homeTeam: action.payload.team === 'home' ? action.payload.name : state.game.homeTeam,
+          awayTeam: action.payload.team === 'away' ? action.payload.name : state.game.awayTeam,
+        };
+        storage.saveGame(updatedGame);
+        return { ...state, game: updatedGame };
+      }
+      return state;
 
     case 'ADD_SHOT':
       if (state.game) {
@@ -170,6 +184,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     dispatch({ type: 'SELECT_TEAM', payload: team });
   };
 
+  const setTeamName = (team: Team, name: string) => {
+    dispatch({ type: 'SET_TEAM_NAME', payload: { team, name } });
+  };
+
   const addShot = (x: number, y: number, shotType: ShotType, result: ShotResult) => {
     if (!state.game || !state.selectedTeam) return;
 
@@ -205,6 +223,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         resetGame,
         setPeriod,
         selectTeam,
+        setTeamName,
         addShot,
         removeShot,
         undoLastShot,
