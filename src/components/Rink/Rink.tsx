@@ -59,6 +59,25 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children }) => {
     return Math.sqrt(dx * dx + dy * dy);
   };
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (rinkRef.current) {
+      const rect = rinkRef.current.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      
+      onShotLocation(
+        Math.max(0, Math.min(100, x)),
+        Math.max(0, Math.min(100, y))
+      );
+      
+      // Haptic feedback
+      const prefs = storage.loadPreferences();
+      if (prefs.hapticFeedback) {
+        triggerHaptic(10);
+      }
+    }
+  };
+
   return (
     <div className="relative w-full overflow-hidden bg-gray-100 rounded-lg">
       <div
@@ -71,6 +90,7 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children }) => {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onClick={handleClick}
       >
         <svg
           viewBox="0 0 200 85"
