@@ -98,7 +98,8 @@ export const exportToPDF = async (
           yPos = 20;
         }
 
-        const text = `${index + 1}. P${shot.period} ${shot.team.toUpperCase()} - ${shot.shotType} - ${shot.result}`;
+        const periodLabel = shot.period === 'OT' ? 'OT' : `P${shot.period}`;
+        const text = `${index + 1}. ${periodLabel} ${shot.team.toUpperCase()} - ${shot.shotType} - ${shot.result}`;
         pdf.text(text, 15, yPos);
         yPos += 5;
       });

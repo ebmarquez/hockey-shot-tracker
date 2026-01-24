@@ -36,7 +36,6 @@ export interface GameState {
   game: Game | null;
   isGameActive: boolean;
   selectedTeam: Team | null;
-  pendingShot: Partial<Shot> | null;
 }
 
 export interface GameStats {

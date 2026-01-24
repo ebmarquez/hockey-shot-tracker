@@ -43,7 +43,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
             >
-              {period === 'OT' ? 'OT' : `${period}st`}
+              {period === 'OT' ? 'OT' : period === 1 ? '1st' : period === 2 ? '2nd' : '3rd'}
             </button>
           ))}
         </div>

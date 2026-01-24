@@ -10,7 +10,6 @@ type GameAction =
   | { type: 'END_GAME' }
   | { type: 'SET_PERIOD'; payload: Period }
   | { type: 'SELECT_TEAM'; payload: Team }
-  | { type: 'SET_PENDING_SHOT'; payload: Partial<Shot> }
   | { type: 'ADD_SHOT'; payload: Shot }
   | { type: 'REMOVE_SHOT'; payload: string }
   | { type: 'UNDO_LAST_SHOT' }
@@ -34,7 +33,6 @@ const initialState: GameState = {
   game: null,
   isGameActive: false,
   selectedTeam: null,
-  pendingShot: null,
 };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -73,9 +71,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'SELECT_TEAM':
       return { ...state, selectedTeam: action.payload };
 
-    case 'SET_PENDING_SHOT':
-      return { ...state, pendingShot: action.payload };
-
     case 'ADD_SHOT':
       if (state.game) {
         const updatedGame = {
@@ -86,7 +81,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return {
           ...state,
           game: updatedGame,
-          pendingShot: null,
         };
       }
       return state;
