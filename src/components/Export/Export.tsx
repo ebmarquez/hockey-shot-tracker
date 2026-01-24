@@ -18,7 +18,8 @@ const Export: React.FC<ExportProps> = ({ game, chartElementId }) => {
       if (element) {
         await exportToPNG(element, `${game.homeTeam}-vs-${game.awayTeam}.png`);
       }
-    } catch (error) {
+    } catch (err) {
+      console.error('Export PNG error:', err);
       alert('Failed to export PNG. Please try again.');
     } finally {
       setIsExporting(false);
@@ -32,7 +33,8 @@ const Export: React.FC<ExportProps> = ({ game, chartElementId }) => {
       if (element) {
         await exportToPDF(game, element);
       }
-    } catch (error) {
+    } catch (err) {
+      console.error('Export PDF error:', err);
       alert('Failed to export PDF. Please try again.');
     } finally {
       setIsExporting(false);

@@ -5,6 +5,23 @@ interface StatisticsProps {
   game: Game;
 }
 
+interface StatCardProps {
+  label: string;
+  value: string | number;
+  color?: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({
+  label,
+  value,
+  color = 'text-gray-800',
+}) => (
+  <div className="text-center">
+    <div className={`text-2xl font-bold ${color}`}>{value}</div>
+    <div className="text-xs text-gray-600">{label}</div>
+  </div>
+);
+
 const Statistics: React.FC<StatisticsProps> = ({ game }) => {
   const getTeamStats = (team: Team): GameStats => {
     const teamShots = game.shots.filter(shot => shot.team === team);
@@ -44,17 +61,6 @@ const Statistics: React.FC<StatisticsProps> = ({ game }) => {
 
   const homeStats = getTeamStats('home');
   const awayStats = getTeamStats('away');
-
-  const StatCard: React.FC<{ label: string; value: string | number; color?: string }> = ({
-    label,
-    value,
-    color = 'text-gray-800',
-  }) => (
-    <div className="text-center">
-      <div className={`text-2xl font-bold ${color}`}>{value}</div>
-      <div className="text-xs text-gray-600">{label}</div>
-    </div>
-  );
 
   return (
     <div className="bg-white shadow-lg rounded-lg p-4 space-y-4">
