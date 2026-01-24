@@ -4,6 +4,7 @@ import Rink from './components/Rink/Rink';
 import ShotMarker from './components/ShotMarker/ShotMarker';
 import ShotForm from './components/ShotForm/ShotForm';
 import type { ShotType, ShotResult, Period, Team } from './types';
+import { calculateShootingPercentage } from './utils/shootingPercentage';
 
 const GameView: React.FC = () => {
   const { state, startGame, resetGame, setPeriod, selectTeam, setTeamName, addShot, undoLastShot } = useGame();
@@ -96,10 +97,10 @@ const GameView: React.FC = () => {
   const awayPeriodGoals = awayPeriodShots.filter(s => s.result === 'goal').length;
   
   // Shooting percentages
-  const homeShootingPct = homeShots.length > 0 ? (homeGoals / homeShots.length) * 100 : 0;
-  const awayShootingPct = awayShots.length > 0 ? (awayGoals / awayShots.length) * 100 : 0;
-  const homePeriodShootingPct = homePeriodShots.length > 0 ? (homePeriodGoals / homePeriodShots.length) * 100 : 0;
-  const awayPeriodShootingPct = awayPeriodShots.length > 0 ? (awayPeriodGoals / awayPeriodShots.length) * 100 : 0;
+  const homeShootingPct = calculateShootingPercentage(homeGoals, homeShots.length);
+  const awayShootingPct = calculateShootingPercentage(awayGoals, awayShots.length);
+  const homePeriodShootingPct = calculateShootingPercentage(homePeriodGoals, homePeriodShots.length);
+  const awayPeriodShootingPct = calculateShootingPercentage(awayPeriodGoals, awayPeriodShots.length);
 
   const periods: Period[] = [1, 2, 3, 'OT'];
 
