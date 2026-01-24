@@ -20,33 +20,37 @@ const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick }) => {
       style={{
         left: `${shot.x}%`,
         top: `${shot.y}%`,
+        minWidth: '44px',
+        minHeight: '44px',
       }}
       onClick={() => onClick?.(shot)}
       title={`${shot.team} - ${shot.result} (${shot.shotType})`}
     >
-      <svg width="24" height="24" viewBox="0 0 24 24">
-        {/* Outer ring for goals */}
-        {isGoal && (
+      <div className="flex items-center justify-center w-full h-full">
+        <svg width="24" height="24" viewBox="0 0 24 24">
+          {/* Outer ring for goals */}
+          {isGoal && (
+            <circle
+              cx="12"
+              cy="12"
+              r="11"
+              fill="none"
+              stroke={isHome ? '#fca5a5' : '#cbd5e1'}
+              strokeWidth="2"
+              opacity="0.7"
+            />
+          )}
+          {/* Main circle */}
           <circle
             cx="12"
             cy="12"
-            r="11"
-            fill="none"
-            stroke={isHome ? '#fca5a5' : '#cbd5e1'}
+            r={isGoal ? 7 : 8}
+            fill={fillColor}
+            stroke={strokeColor}
             strokeWidth="2"
-            opacity="0.7"
           />
-        )}
-        {/* Main circle */}
-        <circle
-          cx="12"
-          cy="12"
-          r={isGoal ? 7 : 8}
-          fill={fillColor}
-          stroke={strokeColor}
-          strokeWidth="2"
-        />
-      </svg>
+        </svg>
+      </div>
     </div>
   );
 };

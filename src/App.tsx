@@ -3,15 +3,18 @@ import { GameProvider, useGame } from './context/GameContext';
 import Rink from './components/Rink/Rink';
 import ShotMarker from './components/ShotMarker/ShotMarker';
 import ShotForm from './components/ShotForm/ShotForm';
-import type { ShotType, ShotResult, Period, Team } from './types';
+import DeleteShotDialog from './components/DeleteShotDialog/DeleteShotDialog';
+import type { Shot, ShotType, ShotResult, Period, Team } from './types';
 import { calculateShootingPercentage } from './utils/shootingPercentage';
+import { triggerHaptic } from './utils/touch';
 import { calculatePerPeriodStats, formatPeriodLabel, formatPeriodStats } from './utils/periodStats';
 
 const GameView: React.FC = () => {
-  const { state, startGame, resetGame, setPeriod, selectTeam, setTeamName, addShot, undoLastShot } = useGame();
+  const { state, startGame, resetGame, setPeriod, selectTeam, setTeamName, addShot, removeShot, undoLastShot } = useGame();
   const [pendingLocation, setPendingLocation] = useState<{ x: number; y: number } | null>(null);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [shotToDelete, setShotToDelete] = useState<Shot | null>(null);
 
   // Auto-start game with default teams if not active
   React.useEffect(() => {
@@ -79,6 +82,22 @@ const GameView: React.FC = () => {
     } else if (e.key === 'Escape') {
       handleCancelEdit();
     }
+  };
+
+  const handleShotMarkerClick = (shot: Shot) => {
+    setShotToDelete(shot);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (shotToDelete) {
+      removeShot(shotToDelete.id);
+      triggerHaptic(20);
+      setShotToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShotToDelete(null);
   };
 
   if (!state.game) {
@@ -318,7 +337,7 @@ const GameView: React.FC = () => {
           <div className="p-2">
             <Rink onShotLocation={handleShotLocation}>
               {state.game.shots.map((shot) => (
-                <ShotMarker key={shot.id} shot={shot} />
+                <ShotMarker key={shot.id} shot={shot} onClick={handleShotMarkerClick} />
               ))}
             </Rink>
           </div>
@@ -343,6 +362,17 @@ const GameView: React.FC = () => {
       {/* Shot Form Modal */}
       {pendingLocation && (
         <ShotForm onSubmit={handleShotSubmit} onCancel={handleShotCancel} />
+      )}
+
+      {/* Delete Shot Dialog */}
+      {shotToDelete && state.game && (
+        <DeleteShotDialog
+          shot={shotToDelete}
+          homeTeam={state.game.homeTeam}
+          awayTeam={state.game.awayTeam}
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+        />
       )}
     </div>
   );
