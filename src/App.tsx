@@ -3,11 +3,13 @@ import { GameProvider, useGame } from './context/GameContext';
 import Rink from './components/Rink/Rink';
 import ShotMarker from './components/ShotMarker/ShotMarker';
 import ShotForm from './components/ShotForm/ShotForm';
-import type { ShotType, ShotResult, Period } from './types';
+import type { ShotType, ShotResult, Period, Team } from './types';
 
 const GameView: React.FC = () => {
-  const { state, startGame, resetGame, setPeriod, selectTeam, addShot, undoLastShot } = useGame();
+  const { state, startGame, resetGame, setPeriod, selectTeam, setTeamName, addShot, undoLastShot } = useGame();
   const [pendingLocation, setPendingLocation] = useState<{ x: number; y: number } | null>(null);
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [editValue, setEditValue] = useState('');
 
   // Auto-start game with default teams if not active
   React.useEffect(() => {
@@ -43,6 +45,37 @@ const GameView: React.FC = () => {
   const handleEndGame = () => {
     if (confirm('End game and start fresh?')) {
       resetGame();
+    }
+  };
+
+  const handleEditTeamName = (team: Team) => {
+    const currentName = team === 'home' ? state.game?.homeTeam : state.game?.awayTeam;
+    setEditingTeam(team);
+    setEditValue(currentName || '');
+  };
+
+  const handleSaveTeamName = () => {
+    if (editingTeam && editValue.trim()) {
+      setTeamName(editingTeam, editValue.trim());
+      setEditingTeam(null);
+      setEditValue('');
+    } else if (editingTeam) {
+      // Reject empty names - just cancel the edit
+      setEditingTeam(null);
+      setEditValue('');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTeam(null);
+    setEditValue('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSaveTeamName();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
     }
   };
 
@@ -98,9 +131,25 @@ const GameView: React.FC = () => {
             state.selectedTeam === 'home' ? 'bg-red-100 ring-2 ring-red-400' : 'bg-red-50'
           }`}>
             <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">HOME</div>
-            <div className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b border-gray-300">
-              {state.game.homeTeam}
-            </div>
+            {editingTeam === 'home' ? (
+              <input
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={handleSaveTeamName}
+                onKeyDown={handleKeyDown}
+                autoFocus
+                className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b-2 border-blue-500 bg-transparent w-full focus:outline-none"
+                onFocus={(e) => e.target.select()}
+              />
+            ) : (
+              <div 
+                onClick={() => handleEditTeamName('home')}
+                className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b border-gray-300 cursor-pointer hover:border-blue-500 transition-colors min-h-[44px] flex items-center"
+              >
+                {state.game.homeTeam}
+              </div>
+            )}
             
             <div className="mt-4">
               <div className="text-xs text-gray-500 mb-2">Current Period</div>
@@ -134,9 +183,25 @@ const GameView: React.FC = () => {
             state.selectedTeam === 'away' ? 'bg-red-100 ring-2 ring-blue-400' : 'bg-red-50'
           }`}>
             <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">AWAY</div>
-            <div className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b border-gray-300">
-              {state.game.awayTeam}
-            </div>
+            {editingTeam === 'away' ? (
+              <input
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={handleSaveTeamName}
+                onKeyDown={handleKeyDown}
+                autoFocus
+                className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b-2 border-blue-500 bg-transparent w-full focus:outline-none"
+                onFocus={(e) => e.target.select()}
+              />
+            ) : (
+              <div 
+                onClick={() => handleEditTeamName('away')}
+                className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b border-gray-300 cursor-pointer hover:border-blue-500 transition-colors min-h-[44px] flex items-center"
+              >
+                {state.game.awayTeam}
+              </div>
+            )}
             
             <div className="mt-4">
               <div className="text-xs text-gray-500 mb-2">Current Period</div>
