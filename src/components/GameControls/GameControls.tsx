@@ -29,20 +29,23 @@ const GameControls: React.FC<GameControlsProps> = ({
   const periods: Period[] = [1, 2, 3, 'OT'];
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-4 space-y-4">
+    <div className="bg-white shadow-xl rounded-xl p-5 space-y-5">
       {/* Period Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Period</label>
+        <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
+          Select Period
+        </label>
         <div className="grid grid-cols-4 gap-2">
           {periods.map((period) => (
             <button
               key={period}
               onClick={() => onPeriodChange(period)}
-              className={`py-3 px-4 rounded-lg font-bold transition-all min-h-[48px]
+              className={`py-4 px-3 rounded-xl font-bold transition-all min-h-[60px] text-lg
+                shadow-md hover:shadow-lg active:scale-95
                 ${
                   currentPeriod === period
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white ring-4 ring-blue-300'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-2 border-gray-300'
                 }`}
             >
               {period === 'OT' ? 'OT' : period === 1 ? '1st' : period === 2 ? '2nd' : '3rd'}
@@ -53,60 +56,72 @@ const GameControls: React.FC<GameControlsProps> = ({
 
       {/* Team Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Select Team</label>
+        <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
+          Select Team
+        </label>
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => onTeamSelect('home')}
-            className={`py-4 px-4 rounded-lg font-bold transition-all min-h-[56px]
+            className={`py-5 px-4 rounded-xl font-bold transition-all min-h-[70px]
+              shadow-md hover:shadow-lg active:scale-95 flex flex-col items-center gap-2
               ${
                 selectedTeam === 'home'
-                  ? 'bg-green-600 text-white ring-4 ring-green-300'
-                  : 'bg-green-100 text-green-800 hover:bg-green-200'
+                  ? 'bg-gradient-to-br from-green-600 to-green-700 text-white ring-4 ring-green-300'
+                  : 'bg-green-50 text-green-800 hover:bg-green-100 border-2 border-green-300'
               }`}
           >
-            🏠 {homeTeam}
+            <span className="text-3xl">🏠</span>
+            <span className="text-sm leading-tight">{homeTeam}</span>
           </button>
           <button
             onClick={() => onTeamSelect('away')}
-            className={`py-4 px-4 rounded-lg font-bold transition-all min-h-[56px]
+            className={`py-5 px-4 rounded-xl font-bold transition-all min-h-[70px]
+              shadow-md hover:shadow-lg active:scale-95 flex flex-col items-center gap-2
               ${
                 selectedTeam === 'away'
-                  ? 'bg-blue-600 text-white ring-4 ring-blue-300'
-                  : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                  ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white ring-4 ring-blue-300'
+                  : 'bg-blue-50 text-blue-800 hover:bg-blue-100 border-2 border-blue-300'
               }`}
           >
-            ✈️ {awayTeam}
+            <span className="text-3xl">✈️</span>
+            <span className="text-sm leading-tight">{awayTeam}</span>
           </button>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-2 gap-2 pt-2">
+      <div className="grid grid-cols-2 gap-3 pt-2">
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className={`py-3 px-4 rounded-lg font-bold transition-all min-h-[48px]
+          className={`py-4 px-4 rounded-xl font-bold transition-all min-h-[60px]
+            shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center gap-2
             ${
               canUndo
-                ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+                ? 'bg-gradient-to-br from-yellow-500 to-yellow-600 text-white'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
         >
-          ↶ Undo
+          <span className="text-2xl">↶</span>
+          <span>Undo</span>
         </button>
         <button
           onClick={onResetGame}
-          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 
-            rounded-lg transition-all min-h-[48px]"
+          className="bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold py-4 px-4 
+            rounded-xl transition-all min-h-[60px] shadow-md hover:shadow-lg active:scale-95
+            flex items-center justify-center gap-2"
         >
-          🔄 Reset
+          <span className="text-2xl">🔄</span>
+          <span>Reset</span>
         </button>
         <button
           onClick={onEndGame}
-          className="col-span-2 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 
-            rounded-lg transition-all min-h-[48px]"
+          className="col-span-2 bg-gradient-to-br from-red-500 to-red-600 text-white font-bold py-4 px-4 
+            rounded-xl transition-all min-h-[60px] shadow-md hover:shadow-lg active:scale-95
+            flex items-center justify-center gap-3"
         >
-          End Game
+          <span className="text-2xl">🛑</span>
+          <span>End Game</span>
         </button>
       </div>
     </div>

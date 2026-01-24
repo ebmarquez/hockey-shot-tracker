@@ -42,30 +42,37 @@ const Export: React.FC<ExportProps> = ({ game, chartElementId }) => {
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-4">
-      <h2 className="text-xl font-bold text-gray-800 mb-4">Export</h2>
+    <div className="bg-white shadow-xl rounded-xl p-5">
+      <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2 justify-center">
+        <span className="text-2xl">📊</span>
+        Export Game Data
+      </h2>
       <div className="space-y-3">
         <button
           onClick={handleExportPNG}
           disabled={isExporting}
-          className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 
-            text-white font-bold py-4 px-6 rounded-lg transition-all min-h-[56px]
-            flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 
+            disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-5 px-6 
+            rounded-xl transition-all min-h-[68px] shadow-md hover:shadow-lg active:scale-95
+            flex items-center justify-center gap-3"
         >
-          {isExporting ? '⏳ Exporting...' : '📷 Export as PNG'}
+          <span className="text-3xl">📷</span>
+          <span>{isExporting ? 'Exporting...' : 'Export as Image'}</span>
         </button>
         <button
           onClick={handleExportPDF}
           disabled={isExporting}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 
-            text-white font-bold py-4 px-6 rounded-lg transition-all min-h-[56px]
-            flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-br from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800
+            disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-5 px-6 
+            rounded-xl transition-all min-h-[68px] shadow-md hover:shadow-lg active:scale-95
+            flex items-center justify-center gap-3"
         >
-          {isExporting ? '⏳ Exporting...' : '📄 Export as PDF'}
+          <span className="text-3xl">📄</span>
+          <span>{isExporting ? 'Exporting...' : 'Export as PDF'}</span>
         </button>
       </div>
-      <p className="text-xs text-gray-500 mt-3 text-center">
-        Export your shot chart and statistics
+      <p className="text-xs text-gray-500 mt-4 text-center leading-relaxed">
+        Save your shot chart and game statistics
       </p>
     </div>
   );
