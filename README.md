@@ -17,12 +17,38 @@ A touch-based web application for tracking hockey shots during games. Built with
 - **Export Options** - Save your shot chart and stats as an image (PNG) or PDF
 - **Progressive Web App (PWA)** - Install on your home screen for app-like experience
 
+## NHL Rink Specifications
+
+The app uses official NHL regulation rink dimensions for accurate shot tracking:
+
+| Dimension | Measurement |
+|-----------|-------------|
+| **Rink Size** | 200 ft × 85 ft (61.0 m × 25.9 m) |
+| **Corner Radius** | 28 ft (8.5 m) |
+| **Goal Line** | 11 ft from end boards |
+| **Blue Lines** | 75 ft from end boards, 50 ft apart |
+| **Center Line** | 100 ft from each end |
+| **Faceoff Circles** | 30 ft diameter |
+| **Goal Opening** | 72" wide × 48" tall |
+| **Crease Radius** | 6 ft |
+| **Trapezoid** | 22 ft at goal, 28 ft at boards |
+
+**Reference Diagrams:**
+- [NHL Hockey Rink (Wikipedia SVG)](https://en.wikipedia.org/wiki/Ice_hockey_rink#/media/File:NHL_Hockey_Rink.svg)
+- [Ice Hockey Layout (Wikipedia SVG)](https://en.wikipedia.org/wiki/Ice_hockey_rink#/media/File:Ice_hockey_layout.svg)
+
+See [project spec.md](project%20spec.md) and [ascii-example-spec.md](ascii-example-spec.md) for detailed implementation specifications.
+
 ## Screenshots
 
-<!-- Add screenshots here once the app is built -->
-| Rink View | Shot Entry | Export |
-|-----------|------------|--------|
-| ![Rink](screenshots/rink.png) | ![Shot Entry](screenshots/shot-entry.png) | ![Export](screenshots/export.png) |
+### Main Game View
+![Main Game View](Snipaste_2026-01-24_09-08-00.png)
+
+### Mobile View
+![Mobile View](Snipaste_2026-01-24_13-26-39_1.png)
+
+### Period Selection
+![Period Buttons](Game%20Period%20button.png)
 
 ## Getting Started
 
@@ -266,7 +292,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- NHL for the standard rink dimensions and layout
+- [NHL](https://www.nhl.com/) for the standard rink dimensions and layout
+- [Wikipedia Ice Hockey Rink article](https://en.wikipedia.org/wiki/Ice_hockey_rink) for detailed specifications and reference diagrams
 - Hockey analytics community for inspiration
 
 ---

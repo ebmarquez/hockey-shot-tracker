@@ -199,6 +199,25 @@ if (!game) return <GameSetup onStart={startGame} />;
 - Always normalize browser coordinates to percentages
 - Store coordinates as floats, not pixels
 
+### NHL Rink Specifications
+The SVG rink uses a viewBox of `0 0 133.33 56.67` which maps to NHL regulation dimensions:
+
+| Real World | ViewBox | Description |
+|------------|---------|-------------|
+| 200 ft × 85 ft | 133.33 × 56.67 | Full rink size |
+| 11 ft | 7.33 | Goal line from end |
+| 75 ft | 50.0 | Blue line from end |
+| 100 ft | 66.67 | Center line |
+| 30 ft | 20.0 | Faceoff circle diameter |
+
+**Key positions:**
+- Home zone: x < 66.67 (left half)
+- Away zone: x > 66.67 (right half)
+- Home goal: x ≈ 7.33, y = 28.33
+- Away goal: x ≈ 126.0, y = 28.33
+
+**Reference:** See [project spec.md](../project%20spec.md) and [ascii-example-spec.md](../ascii-example-spec.md) for full NHL rink specifications.
+
 ### Game State Validation
 ```typescript
 // Always check game exists before operations
