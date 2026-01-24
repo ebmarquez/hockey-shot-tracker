@@ -4,6 +4,7 @@ import Rink from './components/Rink/Rink';
 import ShotMarker from './components/ShotMarker/ShotMarker';
 import ShotForm from './components/ShotForm/ShotForm';
 import type { ShotType, ShotResult, Period, Team } from './types';
+import { calculateShootingPercentage } from './utils/shootingPercentage';
 
 const GameView: React.FC = () => {
   const { state, startGame, resetGame, setPeriod, selectTeam, setTeamName, addShot, undoLastShot } = useGame();
@@ -94,6 +95,12 @@ const GameView: React.FC = () => {
   const awayPeriodShots = awayShots.filter(s => s.period === state.game!.currentPeriod);
   const homePeriodGoals = homePeriodShots.filter(s => s.result === 'goal').length;
   const awayPeriodGoals = awayPeriodShots.filter(s => s.result === 'goal').length;
+  
+  // Shooting percentages
+  const homeShootingPct = calculateShootingPercentage(homeGoals, homeShots.length);
+  const awayShootingPct = calculateShootingPercentage(awayGoals, awayShots.length);
+  const homePeriodShootingPct = calculateShootingPercentage(homePeriodGoals, homePeriodShots.length);
+  const awayPeriodShootingPct = calculateShootingPercentage(awayPeriodGoals, awayPeriodShots.length);
 
   const periods: Period[] = [1, 2, 3, 'OT'];
 
@@ -162,6 +169,10 @@ const GameView: React.FC = () => {
                   <div className="text-4xl font-bold text-red-400 tabular-nums">{homePeriodGoals}</div>
                   <div className="text-xs text-gray-500">Goals</div>
                 </div>
+                <div>
+                  <div className="text-4xl font-bold text-red-400 tabular-nums">{homePeriodShootingPct.toFixed(1)}%</div>
+                  <div className="text-xs text-gray-500">Sh%</div>
+                </div>
               </div>
             </div>
 
@@ -173,6 +184,9 @@ const GameView: React.FC = () => {
                 </span>
                 <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200">
                   {homeGoals} G
+                </span>
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 tabular-nums">
+                  {homeShootingPct.toFixed(1)}%
                 </span>
               </div>
             </div>
@@ -214,6 +228,10 @@ const GameView: React.FC = () => {
                   <div className="text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodGoals}</div>
                   <div className="text-xs text-gray-500">Goals</div>
                 </div>
+                <div>
+                  <div className="text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShootingPct.toFixed(1)}%</div>
+                  <div className="text-xs text-gray-500">Sh%</div>
+                </div>
               </div>
             </div>
 
@@ -225,6 +243,9 @@ const GameView: React.FC = () => {
                 </span>
                 <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200">
                   {awayGoals} G
+                </span>
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 tabular-nums">
+                  {awayShootingPct.toFixed(1)}%
                 </span>
               </div>
             </div>
