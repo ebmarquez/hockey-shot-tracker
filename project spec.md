@@ -71,11 +71,55 @@ The design evokes the excitement and precision of professional hockey analytics 
 
 **Description**: A fully rendered NHL-specification ice rink (200ft x 85ft proportions) displayed as an interactive SVG that accepts user clicks to record shot locations.
 
-**Rink Specifications**:
-- Regulation proportions (133.33 x 56.67 viewBox units representing 200ft x 85ft)
-- Center ice face-off circle (30ft diameter)
+**Rink Specifications** (Based on [Official NHL Rules](https://www.nhl.com/ice/page.htm?id=26458) and [Wikipedia Ice Hockey Rink](https://en.wikipedia.org/wiki/Ice_hockey_rink)):
+
+#### NHL Regulation Dimensions
+| Element | Measurement | SVG ViewBox Units |
+|---------|-------------|-------------------|
+| **Overall Size** | 200 ft × 85 ft (61.0 m × 25.9 m) | 133.33 × 56.67 |
+| **Corner Radius** | 28 ft (8.5 m) | 18.67 |
+| **Goal Line from End** | 11 ft (3.4 m) | 7.33 |
+| **Blue Lines from End** | 75 ft (22.9 m) | 50.0 |
+| **Blue Lines Apart** | 50 ft (15.2 m) | 33.33 |
+| **Center Line** | Middle (100 ft from each end) | 66.67 |
+
+#### Lines and Markings
+- **Center Red Line**: 12 inches (30 cm) wide, runs across center ice
+- **Blue Lines**: 12 inches (30 cm) wide, 75 ft from end boards
+- **Goal Lines**: 2 inches (5 cm) wide, 11 ft from end boards
+
+#### Faceoff Circles and Spots
+- **Center Ice Circle**: 30 ft (9 m) diameter, blue
+- **Center Faceoff Spot**: 12 inches (30 cm) diameter, solid blue
+- **End Zone Faceoff Circles**: 30 ft (9 m) diameter, red
+- **End Zone Faceoff Spots**: 2 ft (61 cm) diameter, red with white center
+- **Neutral Zone Spots**: 4 spots, 2 ft diameter, red (no surrounding circle)
+
+#### Goal and Crease
+- **Goal Opening**: 72 inches (180 cm) wide × 48 inches (120 cm) tall
+- **Goal Depth**: 40 inches (100 cm)
+- **Crease**: Semi-circular, 6 ft (1.8 m) radius from goal line
+- **Crease Hash Marks**: 5 inches (13 cm) thick, 4 ft from goal line
+
+#### Goaltender Trapezoid ("Martin Brodeur Rule")
+- **Base at Goal Line**: 22 ft (6.7 m) wide (centered behind goal)
+- **Base at End Boards**: 28 ft (8.5 m) wide
+- **Depth**: 11 ft (3.4 m) from goal line to boards
+- Goaltender may only handle puck within trapezoid behind goal line
+
+#### Boards
+- **Height**: 40-48 inches (100-120 cm)
+- Curved "corner boards" connect straight sections
+
+#### Reference Diagrams
+- [NHL Hockey Rink Diagram (Wikipedia SVG)](https://en.wikipedia.org/wiki/Ice_hockey_rink#/media/File:NHL_Hockey_Rink.svg)
+- [Ice Hockey Layout Diagram](https://en.wikipedia.org/wiki/Ice_hockey_rink#/media/File:Ice_hockey_layout.svg)
+
+#### Implementation in App
+- Regulation proportions (133.33 × 56.67 viewBox units representing 200 ft × 85 ft)
+- Center ice face-off circle (30 ft diameter = 20 viewBox units)
 - Offensive zone face-off circles (4 circles, properly positioned)
-- Blue lines, red center line, goal lines
+- Blue lines, red center line, goal lines at correct positions
 - Goal creases with proper NHL trapezoid shape
 - Ice texture with subtle pattern overlay
 - Zone labels (Home Zone / Away Zone)
@@ -257,12 +301,37 @@ interface GameState {
 
 ### Coordinate System
 
-**ViewBox Coordinates**:
-- Rink viewBox: `0 0 133.33 56.67` (maintaining 200:85 aspect ratio)
-- Represents NHL regulation size (200 ft × 85 ft)
-- Center line: x = 66.67
-- Home zone: x < 66.67
-- Away zone: x > 66.67
+**ViewBox Coordinates** (NHL Regulation Mapping):
+
+The SVG viewBox uses a coordinate system that maps directly to NHL regulation dimensions:
+
+```
+Real World (feet)  →  ViewBox Units  →  Percentage
+200 ft (length)    →  133.33         →  100%
+85 ft (width)      →  56.67          →  100%
+```
+
+**Conversion Formula**: `viewBox units = (feet / 200) × 133.33` for x, `(feet / 85) × 56.67` for y
+
+#### Key Position Mappings
+| NHL Feature | Real Position | ViewBox X | ViewBox Y |
+|-------------|---------------|-----------|----------|
+| **Left End Boards** | 0 ft | 0 | — |
+| **Left Goal Line** | 11 ft | 7.33 | 28.33 (center) |
+| **Left Blue Line** | 75 ft | 50.0 | — |
+| **Center Line** | 100 ft | 66.67 | — |
+| **Right Blue Line** | 125 ft | 83.33 | — |
+| **Right Goal Line** | 189 ft | 126.0 | 28.33 (center) |
+| **Right End Boards** | 200 ft | 133.33 | — |
+| **Top Boards** | — | — | 0 |
+| **Center Ice** | — | 66.67 | 28.33 |
+| **Bottom Boards** | — | — | 56.67 |
+
+#### Zone Boundaries
+- **Home Defensive Zone**: x = 0 to 50.0 (goal line to blue line)
+- **Neutral Zone**: x = 50.0 to 83.33 (between blue lines)
+- **Away Defensive Zone**: x = 83.33 to 133.33 (blue line to goal line)
+- For shot tracking: Home zone x < 66.67, Away zone x > 66.67
 
 **Click to Coordinate Conversion**:
 ```typescript

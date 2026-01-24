@@ -6,6 +6,9 @@ This document provides visual illustrations of the Hockey Shot Tracker user inte
 - [User Workflows](#user-workflows)
 ---
 ## Main Game View
+
+![](/Snipaste_2026-01-24_13-26-39_1.png)
+
 ### Desktop Layout (Full Screen
 
 ![](/Snipaste_2026-01-24_09-08-00.png)
@@ -79,6 +82,9 @@ Before Hover:          On Hover (cursor: pointer):
    
 
 ### Period 
+
+![](/Game%20Period%20button.png)
+
 ```
 ┌─────────────┐               ┌───────
 │ (gray bg)   │               │ (blue fill) │
@@ -480,35 +486,178 @@ Mobile Portrait (< 768px):
 ```
 ---
 ## Ice Rink Specifications
+
+### Official NHL Rink Reference Images
+
+**Wikipedia SVG Diagrams** (recommended for implementation reference):
+- [NHL Hockey Rink - Clean Diagram](https://en.wikipedia.org/wiki/Ice_hockey_rink#/media/File:NHL_Hockey_Rink.svg)
+- [Ice Hockey Layout - Detailed](https://en.wikipedia.org/wiki/Ice_hockey_rink#/media/File:Ice_hockey_layout.svg)
+
 ### NHL Regulation Dimensions
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              NHL ICE HOCKEY RINK                                 │
+│                           200 ft × 85 ft (61.0m × 25.9m)                        │
+│                                                                                  │
+│  ╭──────────────────────────────────────────────────────────────────────────╮   │
+│  │                                                                          │   │
+│  │   ┌─────┐         ┌─────────────┐                 ┌─────┐               │   │
+│  │   │     │         │  FACEOFF    │      ○          │     │               │   │
+│  │   │GOAL │    ○    │   CIRCLE    │   CENTER    ○   │GOAL │               │   │
+│  │   │     │         │   (30ft ∅)  │    SPOT         │     │               │   │
+│  │   └─────┘    ○    └─────────────┘                 └─────┘               │   │
+│  │      │                                                 │                │   │
+│  │      │            │              │              │      │                │   │
+│  │   GOAL          BLUE          CENTER          BLUE   GOAL               │   │
+│  │   LINE          LINE           LINE           LINE   LINE               │   │
+│  │   11ft          75ft           100ft          125ft  189ft              │   │
+│  │                                                                          │   │
+│  ╰──────────────────────────────────────────────────────────────────────────╯   │
+│     └── Corner Radius: 28 ft (8.5m) ──┘                                         │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-├──────────────────
-  ┌
+### Detailed Rink Layout (Top View)
 
-  │
-
-  │            
-
-  │                 │    │    │          
-
-
-• Goal Line: 11 ft from boards
-• Center Red Line: Exactly center (100 ft from each end)
-• Goal Crease: Trapezoid shape extending behind goal
 ```
-### SVG ViewBox Coordinates
+                                    200 ft (61.0 m)
+    ◄─────────────────────────────────────────────────────────────────────────────►
+    
+    ╭────────────────────────────────────────────────────────────────────────────╮  ▲
+    │                                     │                                      │  │
+    │  ╭───╮                              │                              ╭───╮   │  │
+    │  │ G │    ○           ○             │             ○           ○    │ G │   │  │
+    │  │ O │         ╭─────────╮    ╭─────┼─────╮    ╭─────────╮         │ O │   │  │
+    │  │ A │    ○    │         │    │     │     │    │         │    ○    │ A │   │  │
+    │  │ L │         │ FACEOFF │    │  CENTER   │    │ FACEOFF │         │ L │   │  85 ft
+    │  ├───┤    ○    │ CIRCLE  │    │   CIRCLE  │    │ CIRCLE  │    ○    ├───┤   │  (25.9m)
+    │  │///│         │  30ft ∅ │    │   30ft ∅  │    │  30ft ∅ │         │///│   │  │
+    │  │///│    ○    │         │    │     │     │    │         │    ○    │///│   │  │
+    │  │///│         ╰─────────╯    ╰─────┼─────╯    ╰─────────╯         │///│   │  │
+    │  ╰───╯                              │                              ╰───╯   │  │
+    │     │                               │                               │      │  │
+    │     │          │                    │                    │          │      │  │
+    │  GOAL        BLUE                 CENTER               BLUE       GOAL     │  │
+    │  LINE        LINE                  LINE                LINE       LINE     │  ▼
+    ╰────────────────────────────────────────────────────────────────────────────╯
+    
+         11ft       75ft                100ft                125ft       189ft
+         └───┬───┘  └────┬────┘         └──┬──┘              └────┬────┘ └───┬───┘
+          3.4m       22.9m              30.5m                  38.1m       57.6m
 ```
 
-┌───────────────────────────────────────┐
-│                                       │
-│                │                      │
-│    (x < 66.67) │    (x > 66.67)       │
-│ (0, 56.67)             (133.33, 56.67)│
+### Key Measurements Table
 
-• Home Goal: x ≈ 11, y = 28.33
-• Center Ice: x = 66.67, y = 28.33
-• Away Blue Line: x ≈ 90
+| Element | Imperial | Metric | ViewBox Units |
+|---------|----------|--------|---------------|
+| **Rink Length** | 200 ft | 61.0 m | 133.33 |
+| **Rink Width** | 85 ft | 25.9 m | 56.67 |
+| **Corner Radius** | 28 ft | 8.5 m | 18.67 |
+| **Goal Line from End** | 11 ft | 3.4 m | 7.33 |
+| **Blue Line from End** | 75 ft | 22.9 m | 50.0 |
+| **Center Line** | 100 ft | 30.5 m | 66.67 |
+| **Faceoff Circle ∅** | 30 ft | 9.1 m | 20.0 |
+| **Goal Width** | 6 ft | 1.8 m | 4.0 |
+| **Goal Height** | 4 ft | 1.2 m | — |
+| **Crease Radius** | 6 ft | 1.8 m | 4.0 |
+
+### Goaltender Trapezoid ("Martin Brodeur Rule")
+
+```
+                         END BOARDS
+    ╔═══════════════════════════════════════════════════╗
+    ║                    28 ft (8.5m)                    ║
+    ║   ╱─────────────────────────────────────────╲     ║
+    ║  ╱                                           ╲    ║
+    ║ ╱              TRAPEZOID ZONE                 ╲   ║
+    ║╱    (Goalie can handle puck only here)        ╲  ║ 11 ft
+    ╠══════════════════╦═══════╦══════════════════════╣ (3.4m)
+    ║                  ║ GOAL  ║                       ║
+    ║                  ║ 6ft   ║                       ║
+    ╚══════════════════╩═══════╩═══════════════════════╝
+                       22 ft (6.7m)
+                         GOAL LINE
+```
+
+### Faceoff Circle Detail
+
+```
+            30 ft diameter (9.1m)
+         ╭─────────────────────╮
+        ╱                       ╲
+       │    ┌─────────────┐      │
+       │    │  HASH MARKS │      │
+       │    │     ┼───┼   │      │  ← Players must stay
+       │    │             │      │    outside until
+       │    │    ●        │      │    puck is dropped
+       │    │  FACEOFF    │      │
+       │    │    SPOT     │      │
+       │    │   (2ft ∅)   │      │
+        ╲   └─────────────┘     ╱
+         ╰─────────────────────╯
+```
+
+### SVG ViewBox Coordinate System
+
+```
+ViewBox: "0 0 133.33 56.67"  (maintains 200:85 aspect ratio)
+
+    (0, 0)                                              (133.33, 0)
+       ┌───────────────────────────────────────────────────┐
+       │                                                   │
+       │   HOME ZONE           │          AWAY ZONE        │
+       │   (x < 66.67)         │          (x > 66.67)      │
+       │                       │                           │
+       │      ●                │               ○           │
+       │   HOME GOAL      CENTER LINE      AWAY GOAL       │
+       │   x ≈ 7.33       x = 66.67        x ≈ 126.0       │
+       │                       │                           │
+       │                       │                           │
+       └───────────────────────────────────────────────────┘
+    (0, 56.67)                                          (133.33, 56.67)
+    
+Coordinate Conversion:
+  viewBox_x = (real_feet_x / 200) × 133.33
+  viewBox_y = (real_feet_y / 85) × 56.67
+```
+
+### Key SVG Positions
+
+| Feature | Real Position | ViewBox X | ViewBox Y |
+|---------|---------------|-----------|-----------|
+| Left End Boards | 0 ft | 0 | — |
+| Left Goal Line | 11 ft | 7.33 | 28.33 |
+| Left Goal Center | 11 ft | 7.33 | 28.33 |
+| Left Blue Line | 75 ft | 50.0 | — |
+| Center Line | 100 ft | 66.67 | — |
+| Center Ice Spot | 100 ft | 66.67 | 28.33 |
+| Right Blue Line | 125 ft | 83.33 | — |
+| Right Goal Line | 189 ft | 126.0 | 28.33 |
+| Right End Boards | 200 ft | 133.33 | — |
+| Top Boards | — | — | 0 |
+| Bottom Boards | — | — | 56.67 |
+
+### Zone Boundaries for Shot Tracking
+
+```
+    ┌──────────────┬──────────────────────────┬──────────────┐
+    │              │                          │              │
+    │   DEFENSIVE  │      NEUTRAL ZONE        │  OFFENSIVE   │
+    │     ZONE     │                          │    ZONE      │
+    │              │                          │              │
+    │  x: 0-50.0   │    x: 50.0-83.33         │ x: 83.33-133 │
+    │              │                          │              │
+    └──────────────┴──────────────────────────┴──────────────┘
+                   ▲                          ▲
+              Blue Line                   Blue Line
+              (x = 50.0)                  (x = 83.33)
+              
+    For shot assignment:
+    • Home Team: shots where x < 66.67 (left half)
+    • Away Team: shots where x > 66.67 (right half)
+```
 
 
 
