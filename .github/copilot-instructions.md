@@ -181,6 +181,21 @@ if (!game) return <GameSetup onStart={startGame} />;
 {isActive ? <ActiveGame /> : <Setup />}
 ```
 
+### Data Filtering for Display
+- Filter data before rendering, not in state
+- Preserve complete data in state; filtering is display-only
+- Use Array methods like `.filter()` inline before `.map()`
+
+**Example:**
+```typescript
+// Filter shots by current period for display
+{state.game.shots
+  .filter(shot => shot.period === state.game!.currentPeriod)
+  .map((shot) => (
+    <ShotMarker key={shot.id} shot={shot} onClick={handleShotMarkerClick} />
+  ))}
+```
+
 ### Event Handlers
 - Name handlers with `handle` prefix: `handleClick`, `handleSubmit`
 - Define handlers before JSX return
@@ -209,6 +224,23 @@ if (!state.selectedTeam) {
   alert('Please select a team first');
   return;
 }
+```
+
+### Period Filtering
+- Filter shots by period for focused visualization
+- Display only current period shots on rink by default
+- Preserve all shots in state - filtering is display-only
+- Statistics should show both current period and game totals
+
+**Pattern:**
+```typescript
+// Filter shots for display
+const displayedShots = state.game.shots
+  .filter(shot => shot.period === state.game!.currentPeriod);
+
+// Statistics use unfiltered data
+const totalShots = state.game.shots.filter(s => s.team === 'home');
+const periodShots = totalShots.filter(s => s.period === currentPeriod);
 ```
 
 ## Export Functionality
@@ -316,6 +348,8 @@ When reviewing or generating code:
 - [ ] Period labels show "1st", "2nd", "3rd", "OT"
 - [ ] Coordinates stored as 0-100 percentages
 - [ ] Component follows directory structure
+- [ ] Period filtering preserves all data in state
+- [ ] Display filtering uses inline `.filter()` before `.map()`
 
 ## Quick Reference
 
