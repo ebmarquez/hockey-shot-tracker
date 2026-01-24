@@ -8,12 +8,13 @@ import {
 
 describe('Per-Period Stats', () => {
   // Helper to create a shot
+  let shotIdCounter = 0;
   const createShot = (
     team: 'home' | 'away',
     period: 1 | 2 | 3 | 'OT',
     result: 'goal' | 'save' | 'miss' | 'blocked'
   ): Shot => ({
-    id: Math.random().toString(),
+    id: `test-shot-${++shotIdCounter}`,
     period,
     timestamp: Date.now(),
     team,
