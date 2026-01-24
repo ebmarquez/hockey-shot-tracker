@@ -10,22 +10,9 @@ const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick }) => {
   const isGoal = shot.result === 'goal';
   const isHome = shot.team === 'home';
 
-  // Colors matching the mockup - home is red/pink, away is orange/gray
-  const getMarkerColor = () => {
-    if (isHome) {
-      return isGoal ? 'bg-red-400' : 'bg-red-300';
-    } else {
-      return isGoal ? 'bg-orange-400' : 'bg-slate-400';
-    }
-  };
-
-  const getRingColor = () => {
-    if (isHome) {
-      return 'ring-red-200';
-    } else {
-      return 'ring-orange-200';
-    }
-  };
+  // Colors: home = red/coral, away = gray/slate
+  const strokeColor = isHome ? '#f87171' : '#94a3b8'; // red-400 / slate-400
+  const fillColor = isGoal ? (isHome ? '#ef4444' : '#64748b') : 'transparent'; // red-500 / slate-500
 
   return (
     <div
@@ -37,23 +24,29 @@ const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick }) => {
       onClick={() => onClick?.(shot)}
       title={`${shot.team} - ${shot.result} (${shot.shotType})`}
     >
-      {/* Outer ring for goals */}
-      {isGoal && (
-        <div className={`absolute inset-0 w-10 h-10 -m-1 rounded-full ${getRingColor()} ring-4 opacity-60`} />
-      )}
-      
-      {/* Main marker */}
-      <div
-        className={`relative w-8 h-8 rounded-full ${getMarkerColor()} 
-          border-2 ${isGoal ? 'border-white' : 'border-white/60'}
-          shadow-md hover:scale-110 active:scale-95 transition-transform
-          flex items-center justify-center`}
-      >
-        {/* Inner dot for regular shots */}
-        {!isGoal && (
-          <div className="w-2 h-2 rounded-full bg-white/80" />
+      <svg width="24" height="24" viewBox="0 0 24 24">
+        {/* Outer ring for goals */}
+        {isGoal && (
+          <circle
+            cx="12"
+            cy="12"
+            r="11"
+            fill="none"
+            stroke={isHome ? '#fca5a5' : '#cbd5e1'}
+            strokeWidth="2"
+            opacity="0.7"
+          />
         )}
-      </div>
+        {/* Main circle */}
+        <circle
+          cx="12"
+          cy="12"
+          r={isGoal ? 7 : 8}
+          fill={fillColor}
+          stroke={strokeColor}
+          strokeWidth="2"
+        />
+      </svg>
     </div>
   );
 };
