@@ -5,23 +5,6 @@ interface StatisticsProps {
   game: Game;
 }
 
-interface StatCardProps {
-  label: string;
-  value: string | number;
-  color?: string;
-}
-
-const StatCard: React.FC<StatCardProps> = ({
-  label,
-  value,
-  color = 'text-gray-800',
-}) => (
-  <div className="text-center">
-    <div className={`text-2xl font-bold ${color}`}>{value}</div>
-    <div className="text-xs text-gray-600">{label}</div>
-  </div>
-);
-
 const Statistics: React.FC<StatisticsProps> = ({ game }) => {
   const getTeamStats = (team: Team): GameStats => {
     const teamShots = game.shots.filter(shot => shot.team === team);
@@ -63,73 +46,81 @@ const Statistics: React.FC<StatisticsProps> = ({ game }) => {
   const awayStats = getTeamStats('away');
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-4 space-y-4">
-      <h2 className="text-xl font-bold text-gray-800 text-center">Game Statistics</h2>
+    <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-4 space-y-4">
+      <h2 className="text-lg font-bold text-white text-center">Full Game Statistics</h2>
 
       {/* Home Team Stats */}
-      <div className="bg-green-50 rounded-lg p-4">
-        <h3 className="font-bold text-green-800 mb-3 text-center">🏠 {game.homeTeam}</h3>
-        <div className="grid grid-cols-3 gap-4">
-          <StatCard label="Shots" value={homeStats.totalShots} color="text-green-700" />
-          <StatCard label="Goals" value={homeStats.goals} color="text-green-700" />
-          <StatCard
-            label="Shooting %"
-            value={`${homeStats.shootingPercentage.toFixed(1)}%`}
-            color="text-green-700"
-          />
+      <div className="bg-gradient-to-br from-emerald-900/40 to-emerald-950/40 rounded-xl p-4 border border-emerald-500/20">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
+          <h3 className="font-bold text-white text-sm uppercase tracking-wide">{game.homeTeam}</h3>
         </div>
-        <div className="grid grid-cols-4 gap-2 mt-3 text-xs">
-          <div className="text-center">
-            <div className="font-bold text-green-700">{homeStats.saves}</div>
-            <div className="text-gray-600">Saves</div>
+        <div className="grid grid-cols-4 gap-3 text-center">
+          <div>
+            <div className="text-2xl font-bold text-emerald-400 tabular-nums">{homeStats.totalShots}</div>
+            <div className="text-xs text-slate-400">Shots</div>
           </div>
-          <div className="text-center">
-            <div className="font-bold text-green-700">{homeStats.misses}</div>
-            <div className="text-gray-600">Misses</div>
+          <div>
+            <div className="text-2xl font-bold text-emerald-400 tabular-nums">{homeStats.goals}</div>
+            <div className="text-xs text-slate-400">Goals</div>
           </div>
-          <div className="text-center">
-            <div className="font-bold text-green-700">{homeStats.blocked}</div>
-            <div className="text-gray-600">Blocked</div>
+          <div>
+            <div className="text-2xl font-bold text-emerald-400 tabular-nums">{homeStats.saves}</div>
+            <div className="text-xs text-slate-400">Saves</div>
           </div>
-          <div className="text-center">
-            <div className="font-bold text-green-700">
-              {homeStats.shotsByPeriod[game.currentPeriod]}
-            </div>
-            <div className="text-gray-600">This Period</div>
+          <div>
+            <div className="text-2xl font-bold text-emerald-400 tabular-nums">{homeStats.shootingPercentage.toFixed(0)}%</div>
+            <div className="text-xs text-slate-400">Sh%</div>
+          </div>
+        </div>
+        {/* Shots by Period */}
+        <div className="mt-3 pt-3 border-t border-emerald-500/20">
+          <div className="text-xs text-slate-500 mb-2">Shots by Period</div>
+          <div className="flex gap-2">
+            {[1, 2, 3, 'OT'].map((p) => (
+              <div key={p} className="flex-1 text-center bg-emerald-900/30 rounded-lg py-1.5">
+                <div className="text-xs text-slate-500">{p === 'OT' ? 'OT' : `P${p}`}</div>
+                <div className="text-sm font-semibold text-emerald-300">{homeStats.shotsByPeriod[p as keyof typeof homeStats.shotsByPeriod] || 0}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Away Team Stats */}
-      <div className="bg-blue-50 rounded-lg p-4">
-        <h3 className="font-bold text-blue-800 mb-3 text-center">✈️ {game.awayTeam}</h3>
-        <div className="grid grid-cols-3 gap-4">
-          <StatCard label="Shots" value={awayStats.totalShots} color="text-blue-700" />
-          <StatCard label="Goals" value={awayStats.goals} color="text-blue-700" />
-          <StatCard
-            label="Shooting %"
-            value={`${awayStats.shootingPercentage.toFixed(1)}%`}
-            color="text-blue-700"
-          />
+      <div className="bg-gradient-to-br from-orange-900/40 to-orange-950/40 rounded-xl p-4 border border-orange-500/20">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-lg shadow-orange-400/50" />
+          <h3 className="font-bold text-white text-sm uppercase tracking-wide">{game.awayTeam}</h3>
         </div>
-        <div className="grid grid-cols-4 gap-2 mt-3 text-xs">
-          <div className="text-center">
-            <div className="font-bold text-blue-700">{awayStats.saves}</div>
-            <div className="text-gray-600">Saves</div>
+        <div className="grid grid-cols-4 gap-3 text-center">
+          <div>
+            <div className="text-2xl font-bold text-orange-400 tabular-nums">{awayStats.totalShots}</div>
+            <div className="text-xs text-slate-400">Shots</div>
           </div>
-          <div className="text-center">
-            <div className="font-bold text-blue-700">{awayStats.misses}</div>
-            <div className="text-gray-600">Misses</div>
+          <div>
+            <div className="text-2xl font-bold text-orange-400 tabular-nums">{awayStats.goals}</div>
+            <div className="text-xs text-slate-400">Goals</div>
           </div>
-          <div className="text-center">
-            <div className="font-bold text-blue-700">{awayStats.blocked}</div>
-            <div className="text-gray-600">Blocked</div>
+          <div>
+            <div className="text-2xl font-bold text-orange-400 tabular-nums">{awayStats.saves}</div>
+            <div className="text-xs text-slate-400">Saves</div>
           </div>
-          <div className="text-center">
-            <div className="font-bold text-blue-700">
-              {awayStats.shotsByPeriod[game.currentPeriod]}
-            </div>
-            <div className="text-gray-600">This Period</div>
+          <div>
+            <div className="text-2xl font-bold text-orange-400 tabular-nums">{awayStats.shootingPercentage.toFixed(0)}%</div>
+            <div className="text-xs text-slate-400">Sh%</div>
+          </div>
+        </div>
+        {/* Shots by Period */}
+        <div className="mt-3 pt-3 border-t border-orange-500/20">
+          <div className="text-xs text-slate-500 mb-2">Shots by Period</div>
+          <div className="flex gap-2">
+            {[1, 2, 3, 'OT'].map((p) => (
+              <div key={p} className="flex-1 text-center bg-orange-900/30 rounded-lg py-1.5">
+                <div className="text-xs text-slate-500">{p === 'OT' ? 'OT' : `P${p}`}</div>
+                <div className="text-sm font-semibold text-orange-300">{awayStats.shotsByPeriod[p as keyof typeof awayStats.shotsByPeriod] || 0}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

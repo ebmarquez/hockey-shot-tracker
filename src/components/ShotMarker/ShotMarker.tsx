@@ -7,35 +7,29 @@ interface ShotMarkerProps {
 }
 
 const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick }) => {
-  const getColor = () => {
-    if (shot.result === 'goal') {
-      // Goals are always bright and prominent
-      return shot.team === 'home' ? 'bg-green-500 ring-4 ring-green-300' : 'bg-blue-500 ring-4 ring-blue-300';
-    }
-    // Regular shots are more subdued
-    switch (shot.result) {
-      case 'save':
-        return shot.team === 'home' ? 'bg-yellow-500' : 'bg-cyan-500';
-      case 'miss':
-        return shot.team === 'home' ? 'bg-orange-500' : 'bg-purple-500';
-      case 'blocked':
-        return shot.team === 'home' ? 'bg-red-500' : 'bg-indigo-500';
-      default:
-        return 'bg-gray-500';
+  const isGoal = shot.result === 'goal';
+  const isHome = shot.team === 'home';
+
+  // Colors matching the mockup - home is red/pink, away is orange/gray
+  const getMarkerColor = () => {
+    if (isHome) {
+      return isGoal ? 'bg-red-400' : 'bg-red-300';
+    } else {
+      return isGoal ? 'bg-orange-400' : 'bg-slate-400';
     }
   };
 
-  const getSize = () => {
-    // Goals are larger
-    return shot.result === 'goal' ? 'w-8 h-8' : 'w-6 h-6';
+  const getRingColor = () => {
+    if (isHome) {
+      return 'ring-red-200';
+    } else {
+      return 'ring-orange-200';
+    }
   };
 
   return (
     <div
-      className={`absolute ${getSize()} rounded-full ${getColor()} border-2 border-white shadow-lg 
-        flex items-center justify-center text-white text-sm font-bold cursor-pointer
-        transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto
-        hover:scale-125 active:scale-110 transition-transform`}
+      className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto cursor-pointer"
       style={{
         left: `${shot.x}%`,
         top: `${shot.y}%`,
@@ -43,7 +37,23 @@ const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick }) => {
       onClick={() => onClick?.(shot)}
       title={`${shot.team} - ${shot.result} (${shot.shotType})`}
     >
-      {shot.result === 'goal' && <span className="text-lg">⚽</span>}
+      {/* Outer ring for goals */}
+      {isGoal && (
+        <div className={`absolute inset-0 w-10 h-10 -m-1 rounded-full ${getRingColor()} ring-4 opacity-60`} />
+      )}
+      
+      {/* Main marker */}
+      <div
+        className={`relative w-8 h-8 rounded-full ${getMarkerColor()} 
+          border-2 ${isGoal ? 'border-white' : 'border-white/60'}
+          shadow-md hover:scale-110 active:scale-95 transition-transform
+          flex items-center justify-center`}
+      >
+        {/* Inner dot for regular shots */}
+        {!isGoal && (
+          <div className="w-2 h-2 rounded-full bg-white/80" />
+        )}
+      </div>
     </div>
   );
 };

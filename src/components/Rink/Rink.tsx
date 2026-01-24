@@ -79,34 +79,26 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children }) => {
   };
 
   return (
-    <div className="relative w-full overflow-hidden bg-gray-900 rounded-xl shadow-2xl">
-      {/* Zone Labels */}
-      <div className="absolute top-3 left-0 right-0 z-10 flex justify-between px-6 pointer-events-none">
-        <div className="bg-green-600 text-white px-6 py-2 rounded-full shadow-xl font-bold text-base tracking-wider">
-          HOME ZONE
-        </div>
-        <div className="bg-blue-600 text-white px-6 py-2 rounded-full shadow-xl font-bold text-base tracking-wider">
-          AWAY ZONE
-        </div>
-      </div>
-      
-      <div
-        ref={rinkRef}
-        className="relative select-none touch-none"
-        style={{
-          transform: `scale(${scale})`,
-          transition: isPinching ? 'none' : 'transform 0.2s ease-out',
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onClick={handleClick}
-      >
-        <svg
-          viewBox="0 0 200 85"
-          className="w-full h-auto"
-          style={{ maxHeight: '70vh' }}
+    <div className="relative w-full">
+      {/* Rink container with team labels */}
+      <div className="relative overflow-hidden rounded-xl border-2 border-slate-300 shadow-lg">
+        <div
+          ref={rinkRef}
+          className="relative select-none touch-none"
+          style={{
+            transform: `scale(${scale})`,
+            transition: isPinching ? 'none' : 'transform 0.2s ease-out',
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onClick={handleClick}
         >
+          <svg
+            viewBox="0 0 200 85"
+            className="w-full h-auto"
+            style={{ maxHeight: '60vh' }}
+          >
           {/* Ice surface with gradient */}
           <defs>
             <linearGradient id="ice-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -233,6 +225,7 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children }) => {
           {children}
         </div>
       </div>
+    </div>
     </div>
   );
 };

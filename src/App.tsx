@@ -1,28 +1,26 @@
 import React, { useState } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
-import GameSetup from './components/GameSetup/GameSetup';
 import Rink from './components/Rink/Rink';
 import ShotMarker from './components/ShotMarker/ShotMarker';
 import ShotForm from './components/ShotForm/ShotForm';
-import GameControls from './components/GameControls/GameControls';
-import Statistics from './components/Statistics/Statistics';
-import Export from './components/Export/Export';
-import type { ShotType, ShotResult } from './types';
+import type { ShotType, ShotResult, Period } from './types';
 
 const GameView: React.FC = () => {
-  const { state, startGame, endGame, resetGame, setPeriod, selectTeam, addShot, undoLastShot } = useGame();
+  const { state, startGame, resetGame, setPeriod, selectTeam, addShot, undoLastShot } = useGame();
   const [pendingLocation, setPendingLocation] = useState<{ x: number; y: number } | null>(null);
 
-  const handleStartGame = (homeTeam: string, awayTeam: string) => {
-    startGame(homeTeam, awayTeam);
-  };
+  // Auto-start game with default teams if not active
+  React.useEffect(() => {
+    if (!state.isGameActive) {
+      startGame('Home', 'Away');
+    }
+  }, [state.isGameActive, startGame]);
 
   const handleShotLocation = (x: number, y: number) => {
-    if (state.selectedTeam) {
-      setPendingLocation({ x, y });
-    } else {
-      alert('Please select a team first');
-    }
+    // NHL Convention: tap left = away shot, tap right = home shot
+    const team = x < 50 ? 'away' : 'home';
+    selectTeam(team);
+    setPendingLocation({ x, y });
   };
 
   const handleShotSubmit = (shotType: ShotType, result: ShotResult) => {
@@ -37,112 +35,189 @@ const GameView: React.FC = () => {
   };
 
   const handleResetGame = () => {
-    if (confirm('Reset game? This will clear all shots and scores but keep the teams.')) {
+    if (confirm('Reset game? This will clear all shots.')) {
       resetGame();
     }
   };
 
-  if (!state.isGameActive || !state.game) {
-    return <GameSetup onStart={handleStartGame} />;
+  const handleEndGame = () => {
+    if (confirm('End game and start fresh?')) {
+      resetGame();
+    }
+  };
+
+  if (!state.game) {
+    return <div className="min-h-screen bg-gray-100 flex items-center justify-center">Loading...</div>;
   }
 
-  // Calculate scores and SOG
+  // Calculate stats
   const homeShots = state.game.shots.filter(s => s.team === 'home');
   const awayShots = state.game.shots.filter(s => s.team === 'away');
   const homeGoals = homeShots.filter(s => s.result === 'goal').length;
   const awayGoals = awayShots.filter(s => s.result === 'goal').length;
+  
+  // Current period stats
+  const homePeriodShots = homeShots.filter(s => s.period === state.game!.currentPeriod);
+  const awayPeriodShots = awayShots.filter(s => s.period === state.game!.currentPeriod);
+  const homePeriodGoals = homePeriodShots.filter(s => s.result === 'goal').length;
+  const awayPeriodGoals = awayPeriodShots.filter(s => s.result === 'goal').length;
+
+  const periods: Period[] = [1, 2, 3, 'OT'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-2 sm:p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Scoreboard Header */}
-        <div className="bg-white rounded-xl shadow-xl p-4 mb-4">
-          <div className="flex items-center justify-between">
-            {/* Home Team */}
-            <div className="flex-1 text-center">
-              <div className="text-sm text-gray-600 font-medium mb-1">HOME</div>
-              <div className="text-2xl sm:text-3xl font-bold text-green-700">{state.game.homeTeam}</div>
-              <div className="flex items-center justify-center gap-4 mt-2">
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <div className="flex items-center justify-center gap-3 px-4 py-3">
+          <button
+            onClick={handleEndGame}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 active:bg-gray-100"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+            End Game
+          </button>
+          <button
+            onClick={handleResetGame}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 active:bg-gray-100"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
+            Reset Game
+          </button>
+        </div>
+      </header>
+
+      <main className="max-w-2xl mx-auto px-4 py-4">
+        {/* Team Cards */}
+        <div className="flex gap-4 mb-4">
+          {/* Home Team Card */}
+          <div className={`flex-1 rounded-xl p-4 transition-all ${
+            state.selectedTeam === 'home' ? 'bg-red-100 ring-2 ring-red-400' : 'bg-red-50'
+          }`}>
+            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">HOME</div>
+            <div className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b border-gray-300">
+              {state.game.homeTeam}
+            </div>
+            
+            <div className="mt-4">
+              <div className="text-xs text-gray-500 mb-2">Current Period</div>
+              <div className="flex gap-8">
                 <div>
-                  <div className="text-4xl sm:text-5xl font-bold text-green-600">{homeGoals}</div>
-                  <div className="text-xs text-gray-500">Goals</div>
+                  <div className="text-4xl font-bold text-red-400 tabular-nums">{homePeriodShots.length}</div>
+                  <div className="text-xs text-gray-500">Shots</div>
                 </div>
                 <div>
-                  <div className="text-2xl sm:text-3xl font-semibold text-gray-700">{homeShots.length}</div>
-                  <div className="text-xs text-gray-500">SOG</div>
+                  <div className="text-4xl font-bold text-red-400 tabular-nums">{homePeriodGoals}</div>
+                  <div className="text-xs text-gray-500">Goals</div>
                 </div>
               </div>
             </div>
 
-            {/* Period Indicator */}
-            <div className="px-4">
-              <div className="text-center bg-blue-600 text-white rounded-lg px-4 py-2">
-                <div className="text-xs font-medium">PERIOD</div>
-                <div className="text-2xl font-bold">
-                  {state.game.currentPeriod === 'OT' ? 'OT' : state.game.currentPeriod}
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-red-200">
+              <span className="text-xs text-gray-500">Game Total</span>
+              <div className="flex gap-2">
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200">
+                  {homeShots.length} S
+                </span>
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200">
+                  {homeGoals} G
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Away Team Card */}
+          <div className={`flex-1 rounded-xl p-4 transition-all ${
+            state.selectedTeam === 'away' ? 'bg-red-100 ring-2 ring-blue-400' : 'bg-red-50'
+          }`}>
+            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">AWAY</div>
+            <div className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b border-gray-300">
+              {state.game.awayTeam}
+            </div>
+            
+            <div className="mt-4">
+              <div className="text-xs text-gray-500 mb-2">Current Period</div>
+              <div className="flex gap-8">
+                <div>
+                  <div className="text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShots.length}</div>
+                  <div className="text-xs text-gray-500">Shots</div>
+                </div>
+                <div>
+                  <div className="text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodGoals}</div>
+                  <div className="text-xs text-gray-500">Goals</div>
                 </div>
               </div>
             </div>
 
-            {/* Away Team */}
-            <div className="flex-1 text-center">
-              <div className="text-sm text-gray-600 font-medium mb-1">AWAY</div>
-              <div className="text-2xl sm:text-3xl font-bold text-blue-700">{state.game.awayTeam}</div>
-              <div className="flex items-center justify-center gap-4 mt-2">
-                <div>
-                  <div className="text-4xl sm:text-5xl font-bold text-blue-600">{awayGoals}</div>
-                  <div className="text-xs text-gray-500">Goals</div>
-                </div>
-                <div>
-                  <div className="text-2xl sm:text-3xl font-semibold text-gray-700">{awayShots.length}</div>
-                  <div className="text-xs text-gray-500">SOG</div>
-                </div>
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-red-200">
+              <span className="text-xs text-gray-500">Game Total</span>
+              <div className="flex gap-2">
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200">
+                  {awayShots.length} S
+                </span>
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200">
+                  {awayGoals} G
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Left Column - Controls */}
-          <div className="space-y-4">
-            <GameControls
-              currentPeriod={state.game.currentPeriod}
-              onPeriodChange={setPeriod}
-              selectedTeam={state.selectedTeam}
-              onTeamSelect={selectTeam}
-              homeTeam={state.game.homeTeam}
-              awayTeam={state.game.awayTeam}
-              onEndGame={endGame}
-              onResetGame={handleResetGame}
-              onUndo={undoLastShot}
-              canUndo={state.game.shots.length > 0}
-            />
-            <Statistics game={state.game} />
+        {/* Rink Card */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+          {/* Period Selector */}
+          <div className="p-4 border-b border-gray-100">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+              </svg>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Period</span>
+            </div>
+            <div className="flex justify-center gap-2">
+              {periods.map((period) => (
+                <button
+                  key={period}
+                  onClick={() => setPeriod(period)}
+                  className={`px-5 py-2 rounded-lg font-semibold text-sm min-w-[60px] transition-colors border
+                    ${state.game!.currentPeriod === period
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 active:bg-gray-100'
+                    }`}
+                >
+                  {period === 'OT' ? 'OT' : period === 1 ? '1st' : period === 2 ? '2nd' : '3rd'}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Rink */}
+          <div className="p-2">
+            <Rink onShotLocation={handleShotLocation}>
+              {state.game.shots.map((shot) => (
+                <ShotMarker key={shot.id} shot={shot} />
+              ))}
+            </Rink>
           </div>
 
-          {/* Center Column - Rink */}
-          <div className="lg:col-span-2 space-y-4">
-            <div id="shot-chart" className="bg-white rounded-lg p-4 shadow-lg">
-              <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
-                Rink - Tap to Record Shot
-              </h2>
-              <Rink onShotLocation={handleShotLocation}>
-                {state.game.shots.map((shot) => (
-                  <ShotMarker key={shot.id} shot={shot} />
-                ))}
-              </Rink>
-              {state.selectedTeam && (
-                <div className="mt-3 text-center text-sm text-gray-600">
-                  Selected: <span className="font-bold">
-                    {state.selectedTeam === 'home' ? state.game.homeTeam : state.game.awayTeam}
-                  </span> - Tap on rink to mark shot location
-                </div>
-              )}
+          {/* Undo Button */}
+          {state.game.shots.length > 0 && (
+            <div className="p-3 border-t border-gray-100">
+              <button
+                onClick={undoLastShot}
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-amber-50 text-amber-700 font-medium text-sm hover:bg-amber-100 active:bg-amber-200 border border-amber-200"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/>
+                </svg>
+                Undo Last Shot
+              </button>
             </div>
-            <Export game={state.game} chartElementId="shot-chart" />
-          </div>
+          )}
         </div>
-      </div>
+      </main>
 
       {/* Shot Form Modal */}
       {pendingLocation && (

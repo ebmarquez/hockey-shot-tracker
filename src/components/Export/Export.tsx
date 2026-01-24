@@ -42,38 +42,40 @@ const Export: React.FC<ExportProps> = ({ game, chartElementId }) => {
   };
 
   return (
-    <div className="bg-white shadow-xl rounded-xl p-5">
-      <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2 justify-center">
-        <span className="text-2xl">📊</span>
+    <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-4">
+      <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 text-center">
         Export Game Data
       </h2>
-      <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
         <button
           onClick={handleExportPNG}
           disabled={isExporting}
-          className="w-full bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 
-            disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-5 px-6 
-            rounded-xl transition-all min-h-[68px] shadow-md hover:shadow-lg active:scale-95
-            flex items-center justify-center gap-3"
+          className="bg-slate-700/50 hover:bg-slate-700 active:bg-slate-600
+            disabled:bg-slate-800/50 disabled:text-slate-600 disabled:cursor-not-allowed
+            text-slate-300 font-semibold py-4 px-4 
+            rounded-xl transition-all min-h-[56px] border border-white/10
+            flex items-center justify-center gap-2"
         >
-          <span className="text-3xl">📷</span>
-          <span>{isExporting ? 'Exporting...' : 'Export as Image'}</span>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span>{isExporting ? 'Exporting...' : 'Save Image'}</span>
         </button>
         <button
           onClick={handleExportPDF}
           disabled={isExporting}
-          className="w-full bg-gradient-to-br from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800
-            disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-5 px-6 
-            rounded-xl transition-all min-h-[68px] shadow-md hover:shadow-lg active:scale-95
-            flex items-center justify-center gap-3"
+          className="bg-slate-700/50 hover:bg-slate-700 active:bg-slate-600
+            disabled:bg-slate-800/50 disabled:text-slate-600 disabled:cursor-not-allowed
+            text-slate-300 font-semibold py-4 px-4 
+            rounded-xl transition-all min-h-[56px] border border-white/10
+            flex items-center justify-center gap-2"
         >
-          <span className="text-3xl">📄</span>
-          <span>{isExporting ? 'Exporting...' : 'Export as PDF'}</span>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>{isExporting ? 'Exporting...' : 'Save PDF'}</span>
         </button>
       </div>
-      <p className="text-xs text-gray-500 mt-4 text-center leading-relaxed">
-        Save your shot chart and game statistics
-      </p>
     </div>
   );
 };
