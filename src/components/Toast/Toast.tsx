@@ -15,6 +15,12 @@ interface ToastProps {
   index: number;
 }
 
+// Toast spacing constants
+const TOAST_BASE_OFFSET = 16; // Base distance from bottom in pixels
+const TOAST_HEIGHT = 48; // Minimum toast height in pixels
+const TOAST_GAP = 16; // Gap between stacked toasts in pixels
+const TOAST_STACK_OFFSET = TOAST_HEIGHT + TOAST_GAP; // Total offset per toast
+
 const Toast: React.FC<ToastProps> = ({ toast, onDismiss, index }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -40,7 +46,7 @@ const Toast: React.FC<ToastProps> = ({ toast, onDismiss, index }) => {
   };
 
   // Calculate position from bottom based on index
-  const bottomPosition = 16 + index * 64; // 16px base + 64px per toast (48px height + 16px gap)
+  const bottomPosition = TOAST_BASE_OFFSET + index * TOAST_STACK_OFFSET;
 
   return (
     <div

@@ -113,8 +113,16 @@ const GameView: React.FC = () => {
 
   const handlePeriodChange = (period: Period) => {
     setPeriod(period);
-    const periodLabel = period === 'OT' ? 'Overtime' : period === 1 ? '1st Period' : period === 2 ? '2nd Period' : '3rd Period';
-    showToast(`Period changed to ${periodLabel}`, 'info');
+    
+    // Format period label for toast message
+    const periodLabels: Record<Period, string> = {
+      1: '1st Period',
+      2: '2nd Period',
+      3: '3rd Period',
+      'OT': 'Overtime'
+    };
+    
+    showToast(`Period changed to ${periodLabels[period]}`, 'info');
   };
 
   if (!state.game) {
