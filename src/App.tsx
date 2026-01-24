@@ -7,6 +7,7 @@ import DeleteShotDialog from './components/DeleteShotDialog/DeleteShotDialog';
 import type { Shot, ShotType, ShotResult, Period, Team } from './types';
 import { calculateShootingPercentage } from './utils/shootingPercentage';
 import { triggerHaptic } from './utils/touch';
+import { calculatePerPeriodStats, formatPeriodLabel, formatPeriodStats } from './utils/periodStats';
 
 const GameView: React.FC = () => {
   const { state, startGame, resetGame, setPeriod, selectTeam, setTeamName, addShot, removeShot, undoLastShot } = useGame();
@@ -121,6 +122,10 @@ const GameView: React.FC = () => {
   const homePeriodShootingPct = calculateShootingPercentage(homePeriodGoals, homePeriodShots.length);
   const awayPeriodShootingPct = calculateShootingPercentage(awayPeriodGoals, awayPeriodShots.length);
 
+  // Per-period breakdown
+  const homePerPeriodStats = calculatePerPeriodStats(state.game.shots, 'home');
+  const awayPerPeriodStats = calculatePerPeriodStats(state.game.shots, 'away');
+
   const periods: Period[] = [1, 2, 3, 'OT'];
 
   return (
@@ -209,6 +214,21 @@ const GameView: React.FC = () => {
                 </span>
               </div>
             </div>
+
+            {/* Per-Period Breakdown */}
+            {homePerPeriodStats.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-red-200">
+                <div className="text-xs text-gray-500 mb-2">By Period</div>
+                <div className="space-y-1">
+                  {homePerPeriodStats.map(stats => (
+                    <div key={stats.period} className="flex justify-between items-center text-xs">
+                      <span className="text-gray-600">{formatPeriodLabel(stats.period)}</span>
+                      <span className="font-semibold text-gray-700 tabular-nums">{formatPeriodStats(stats)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Away Team Card */}
@@ -268,6 +288,21 @@ const GameView: React.FC = () => {
                 </span>
               </div>
             </div>
+
+            {/* Per-Period Breakdown */}
+            {awayPerPeriodStats.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-red-200">
+                <div className="text-xs text-gray-500 mb-2">By Period</div>
+                <div className="space-y-1">
+                  {awayPerPeriodStats.map(stats => (
+                    <div key={stats.period} className="flex justify-between items-center text-xs">
+                      <span className="text-gray-600">{formatPeriodLabel(stats.period)}</span>
+                      <span className="font-semibold text-gray-700 tabular-nums">{formatPeriodStats(stats)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
