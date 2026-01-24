@@ -80,6 +80,16 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children }) => {
 
   return (
     <div className="relative w-full overflow-hidden bg-gray-100 rounded-lg">
+      {/* Zone Labels */}
+      <div className="absolute top-2 left-0 right-0 z-10 flex justify-between px-4 pointer-events-none">
+        <div className="bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm">
+          HOME
+        </div>
+        <div className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm">
+          AWAY
+        </div>
+      </div>
+      
       <div
         ref={rinkRef}
         className="relative select-none touch-none"

@@ -8,6 +8,7 @@ import { storage } from '../utils/storage';
 type GameAction =
   | { type: 'START_GAME'; payload: { homeTeam: string; awayTeam: string } }
   | { type: 'END_GAME' }
+  | { type: 'RESET_GAME' }
   | { type: 'SET_PERIOD'; payload: Period }
   | { type: 'SELECT_TEAM'; payload: Team }
   | { type: 'ADD_SHOT'; payload: Shot }
@@ -20,6 +21,7 @@ interface GameContextType {
   dispatch: React.Dispatch<GameAction>;
   startGame: (homeTeam: string, awayTeam: string) => void;
   endGame: () => void;
+  resetGame: () => void;
   setPeriod: (period: Period) => void;
   selectTeam: (team: Team) => void;
   addShot: (x: number, y: number, shotType: ShotType, result: ShotResult) => void;
@@ -59,6 +61,24 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'END_GAME':
       storage.clearGame();
       return initialState;
+
+    case 'RESET_GAME':
+      if (state.game) {
+        const resetGame: Game = {
+          ...state.game,
+          id: uuidv4(),
+          date: new Date().toISOString(),
+          currentPeriod: 1,
+          shots: [],
+        };
+        storage.saveGame(resetGame);
+        return {
+          ...state,
+          game: resetGame,
+          selectedTeam: null,
+        };
+      }
+      return state;
 
     case 'SET_PERIOD':
       if (state.game) {
@@ -138,6 +158,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     dispatch({ type: 'END_GAME' });
   };
 
+  const resetGame = () => {
+    dispatch({ type: 'RESET_GAME' });
+  };
+
   const setPeriod = (period: Period) => {
     dispatch({ type: 'SET_PERIOD', payload: period });
   };
@@ -178,6 +202,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         dispatch,
         startGame,
         endGame,
+        resetGame,
         setPeriod,
         selectTeam,
         addShot,

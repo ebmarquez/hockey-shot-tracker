@@ -10,7 +10,7 @@ import Export from './components/Export/Export';
 import type { ShotType, ShotResult } from './types';
 
 const GameView: React.FC = () => {
-  const { state, startGame, endGame, setPeriod, selectTeam, addShot, undoLastShot } = useGame();
+  const { state, startGame, endGame, resetGame, setPeriod, selectTeam, addShot, undoLastShot } = useGame();
   const [pendingLocation, setPendingLocation] = useState<{ x: number; y: number } | null>(null);
 
   const handleStartGame = (homeTeam: string, awayTeam: string) => {
@@ -36,18 +36,69 @@ const GameView: React.FC = () => {
     setPendingLocation(null);
   };
 
+  const handleResetGame = () => {
+    if (confirm('Reset game? This will clear all shots and scores but keep the teams.')) {
+      resetGame();
+    }
+  };
+
   if (!state.isGameActive || !state.game) {
     return <GameSetup onStart={handleStartGame} />;
   }
 
+  // Calculate scores and SOG
+  const homeShots = state.game.shots.filter(s => s.team === 'home');
+  const awayShots = state.game.shots.filter(s => s.team === 'away');
+  const homeGoals = homeShots.filter(s => s.result === 'goal').length;
+  const awayGoals = awayShots.filter(s => s.result === 'goal').length;
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-2 sm:p-4">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg p-4 mb-4 shadow-lg">
-          <h1 className="text-2xl font-bold text-center">🏒 Hockey Shot Tracker</h1>
-          <div className="text-center mt-2">
-            <span className="text-lg">{state.game.homeTeam} vs {state.game.awayTeam}</span>
+        {/* Scoreboard Header */}
+        <div className="bg-white rounded-xl shadow-xl p-4 mb-4">
+          <div className="flex items-center justify-between">
+            {/* Home Team */}
+            <div className="flex-1 text-center">
+              <div className="text-sm text-gray-600 font-medium mb-1">HOME</div>
+              <div className="text-2xl sm:text-3xl font-bold text-green-700">{state.game.homeTeam}</div>
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <div>
+                  <div className="text-4xl sm:text-5xl font-bold text-green-600">{homeGoals}</div>
+                  <div className="text-xs text-gray-500">Goals</div>
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-semibold text-gray-700">{homeShots.length}</div>
+                  <div className="text-xs text-gray-500">SOG</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Period Indicator */}
+            <div className="px-4">
+              <div className="text-center bg-blue-600 text-white rounded-lg px-4 py-2">
+                <div className="text-xs font-medium">PERIOD</div>
+                <div className="text-2xl font-bold">
+                  {state.game.currentPeriod === 'OT' ? 'OT' : state.game.currentPeriod}
+                </div>
+              </div>
+            </div>
+
+            {/* Away Team */}
+            <div className="flex-1 text-center">
+              <div className="text-sm text-gray-600 font-medium mb-1">AWAY</div>
+              <div className="text-2xl sm:text-3xl font-bold text-blue-700">{state.game.awayTeam}</div>
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <div>
+                  <div className="text-4xl sm:text-5xl font-bold text-blue-600">{awayGoals}</div>
+                  <div className="text-xs text-gray-500">Goals</div>
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-semibold text-gray-700">{awayShots.length}</div>
+                  <div className="text-xs text-gray-500">SOG</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -62,6 +113,7 @@ const GameView: React.FC = () => {
               homeTeam={state.game.homeTeam}
               awayTeam={state.game.awayTeam}
               onEndGame={endGame}
+              onResetGame={handleResetGame}
               onUndo={undoLastShot}
               canUndo={state.game.shots.length > 0}
             />

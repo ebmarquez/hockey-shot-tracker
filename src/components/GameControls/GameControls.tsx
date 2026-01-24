@@ -9,6 +9,7 @@ interface GameControlsProps {
   homeTeam: string;
   awayTeam: string;
   onEndGame: () => void;
+  onResetGame: () => void;
   onUndo: () => void;
   canUndo: boolean;
 }
@@ -21,6 +22,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   homeTeam,
   awayTeam,
   onEndGame,
+  onResetGame,
   onUndo,
   canUndo,
 }) => {
@@ -79,11 +81,11 @@ const GameControls: React.FC<GameControlsProps> = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 pt-2">
+      <div className="grid grid-cols-2 gap-2 pt-2">
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className={`flex-1 py-3 px-4 rounded-lg font-bold transition-all min-h-[48px]
+          className={`py-3 px-4 rounded-lg font-bold transition-all min-h-[48px]
             ${
               canUndo
                 ? 'bg-yellow-500 text-white hover:bg-yellow-600'
@@ -93,8 +95,15 @@ const GameControls: React.FC<GameControlsProps> = ({
           ↶ Undo
         </button>
         <button
+          onClick={onResetGame}
+          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 
+            rounded-lg transition-all min-h-[48px]"
+        >
+          🔄 Reset
+        </button>
+        <button
           onClick={onEndGame}
-          className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 
+          className="col-span-2 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 
             rounded-lg transition-all min-h-[48px]"
         >
           End Game
