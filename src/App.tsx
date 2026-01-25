@@ -5,6 +5,7 @@ import Rink from './components/Rink/Rink';
 import ShotMarker from './components/ShotMarker/ShotMarker';
 import ShotForm from './components/ShotForm/ShotForm';
 import DeleteShotDialog from './components/DeleteShotDialog/DeleteShotDialog';
+import GameSummary from './components/GameSummary/GameSummary';
 import type { Shot, ShotType, ShotResult, Period, Team } from './types';
 import { calculateShootingPercentage } from './utils/shootingPercentage';
 import { triggerHaptic } from './utils/touch';
@@ -17,6 +18,7 @@ const GameView: React.FC = () => {
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [editValue, setEditValue] = useState('');
   const [shotToDelete, setShotToDelete] = useState<Shot | null>(null);
+  const [showSummary, setShowSummary] = useState(false);
 
   // Auto-start game with default teams if not active
   React.useEffect(() => {
@@ -158,6 +160,15 @@ const GameView: React.FC = () => {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
         <div className="flex items-center justify-center gap-3 px-4 py-3">
+          <button
+            onClick={() => setShowSummary(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500 bg-blue-50 text-blue-700 font-medium text-sm hover:bg-blue-100 active:bg-blue-200"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+            </svg>
+            Summary
+          </button>
           <button
             onClick={handleEndGame}
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 active:bg-gray-100"
@@ -415,6 +426,15 @@ const GameView: React.FC = () => {
           awayTeam={state.game.awayTeam}
           onConfirm={handleDeleteConfirm}
           onCancel={handleDeleteCancel}
+        />
+      )}
+
+      {/* Game Summary */}
+      {state.game && (
+        <GameSummary
+          isOpen={showSummary}
+          onClose={() => setShowSummary(false)}
+          game={state.game}
         />
       )}
     </div>
