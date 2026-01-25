@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { Game, Shot, Period } from '../../types';
 import ShotMarker from '../ShotMarker/ShotMarker';
 import { calculateShootingPercentage } from '../../utils/shootingPercentage';
@@ -69,7 +69,7 @@ const MiniRink: React.FC<{ shots: Shot[]; period: Period }> = ({ shots, period }
 const GameSummary: React.FC<GameSummaryProps> = ({ isOpen, onClose, game }) => {
   const summaryRef = useRef<HTMLDivElement>(null);
   const shotMapRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = React.useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Escape key handler
   useEffect(() => {
@@ -102,14 +102,11 @@ const GameSummary: React.FC<GameSummaryProps> = ({ isOpen, onClose, game }) => {
   const homeShootingPct = calculateShootingPercentage(homeGoals, homeShots.length);
   const awayShootingPct = calculateShootingPercentage(awayGoals, awayShots.length);
 
-  // Determine which periods have shots
-  const periodsWithShots: Period[] = [];
+  // Define all periods and determine which have shots
   const allPeriods: Period[] = [1, 2, 3, 'OT'];
-  allPeriods.forEach(period => {
-    if (game.shots.some(shot => shot.period === period)) {
-      periodsWithShots.push(period);
-    }
-  });
+  const periodsWithShots = allPeriods.filter(period => 
+    game.shots.some(shot => shot.period === period)
+  );
   // If no shots, show all regular periods
   const periodsToShow: Period[] = periodsWithShots.length > 0 ? periodsWithShots : [1, 2, 3];
 
