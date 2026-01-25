@@ -360,7 +360,11 @@ const GameView: React.FC = () => {
           
           {/* Rink */}
           <div className="p-2">
-            <Rink onShotLocation={handleShotLocation}>
+            <Rink 
+              onShotLocation={handleShotLocation}
+              homeTeamName={state.game.homeTeam}
+              awayTeamName={state.game.awayTeam}
+            >
               {state.game.shots
                 .filter(shot => shot.period === state.game!.currentPeriod)
                 .map((shot) => (
