@@ -3,9 +3,11 @@ import React, { useRef } from 'react';
 interface RinkProps {
   onShotLocation: (x: number, y: number) => void;
   children?: React.ReactNode;
+  homeTeamName?: string;
+  awayTeamName?: string;
 }
 
-const Rink: React.FC<RinkProps> = ({ onShotLocation, children }) => {
+const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awayTeamName }) => {
   const rinkRef = useRef<HTMLDivElement>(null);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -158,6 +160,16 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children }) => {
         <div className="absolute inset-0 pointer-events-none">
           {children}
         </div>
+      </div>
+      
+      {/* Zone Labels */}
+      <div className="flex justify-between px-2 mt-1">
+        <span className="text-gray-400 text-sm">
+          {awayTeamName ? `${awayTeamName} Zone` : 'Away Zone'}
+        </span>
+        <span className="text-gray-400 text-sm">
+          {homeTeamName ? `${homeTeamName} Zone` : 'Home Zone'}
+        </span>
       </div>
     </div>
   );
