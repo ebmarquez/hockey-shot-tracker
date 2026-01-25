@@ -373,6 +373,18 @@ const GameView: React.FC = () => {
             </Rink>
           </div>
 
+          {/* Shot Count Display */}
+          <div className="text-gray-500 text-sm text-center py-2">
+            {(() => {
+              const currentPeriodShots = state.game.shots.filter(
+                shot => shot.period === state.game!.currentPeriod
+              ).length;
+              const shotWord = currentPeriodShots === 1 ? 'shot' : 'shots';
+              const periodLabel = formatPeriodLabel(state.game!.currentPeriod);
+              return `${currentPeriodShots} ${shotWord} recorded in ${periodLabel}`;
+            })()}
+          </div>
+
           {/* Undo Button */}
           {state.game.shots.length > 0 && (
             <div className="p-3 border-t border-gray-100">
