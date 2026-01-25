@@ -251,7 +251,7 @@ const GameSummary: React.FC<GameSummaryProps> = ({ isOpen, onClose, game }) => {
                   </div>
                   <MiniRink shots={game.shots} period={period} />
                   <div className="text-xs text-center text-gray-500 mt-1">
-                    {periodShots.length} shots
+                    {periodShots.length} {periodShots.length === 1 ? 'shot' : 'shots'}
                   </div>
                 </div>
               );
