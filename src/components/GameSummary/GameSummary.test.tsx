@@ -144,7 +144,7 @@ describe('GameSummary', () => {
       render(<GameSummary isOpen={true} onClose={onClose} game={game} />);
 
       expect(screen.getByText('3 shots')).toBeInTheDocument(); // Period 1
-      expect(screen.getByText('1 shots')).toBeInTheDocument(); // Period 2
+      expect(screen.getByText('1 shot')).toBeInTheDocument(); // Period 2 - singular
     });
   });
 

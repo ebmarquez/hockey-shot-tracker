@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { Game, Shot, Period } from '../../types';
 import ShotMarker from '../ShotMarker/ShotMarker';
 import { calculateShootingPercentage } from '../../utils/shootingPercentage';
-import { formatPeriodLabel } from '../../utils/periodStats';
+import { calculatePerPeriodStats, formatPeriodLabel } from '../../utils/periodStats';
 import { exportToPNG } from '../../utils/exportImage';
 import { exportToPDF } from '../../utils/exportPDF';
 
@@ -138,22 +138,9 @@ const GameSummary: React.FC<GameSummaryProps> = ({ isOpen, onClose, game }) => {
     return result.charAt(0).toUpperCase() + result.slice(1);
   };
 
-  // Per-period stats
-  const getPerPeriodStats = (team: 'home' | 'away') => {
-    const teamShots = game.shots.filter(s => s.team === team);
-    return allPeriods.map(period => {
-      const periodShots = teamShots.filter(s => s.period === period);
-      const periodGoals = periodShots.filter(s => s.result === 'goal').length;
-      return {
-        period,
-        shots: periodShots.length,
-        goals: periodGoals,
-      };
-    }).filter(stat => stat.shots > 0);
-  };
-
-  const homePerPeriodStats = getPerPeriodStats('home');
-  const awayPerPeriodStats = getPerPeriodStats('away');
+  // Per-period stats using existing utility
+  const homePerPeriodStats = calculatePerPeriodStats(game.shots, 'home');
+  const awayPerPeriodStats = calculatePerPeriodStats(game.shots, 'away');
 
   // Export handlers
   const handleExportPNG = async () => {

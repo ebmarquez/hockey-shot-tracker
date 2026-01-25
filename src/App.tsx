@@ -162,7 +162,7 @@ const GameView: React.FC = () => {
         <div className="flex items-center justify-center gap-3 px-4 py-3">
           <button
             onClick={() => setShowSummary(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500 bg-blue-50 text-blue-700 font-medium text-sm hover:bg-blue-100 active:bg-blue-200"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500 bg-blue-50 text-blue-700 font-medium text-sm hover:bg-blue-100 active:bg-blue-200 min-h-[44px]"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
