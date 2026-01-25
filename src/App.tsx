@@ -361,9 +361,11 @@ const GameView: React.FC = () => {
           {/* Rink */}
           <div className="p-2">
             <Rink onShotLocation={handleShotLocation}>
-              {state.game.shots.map((shot) => (
-                <ShotMarker key={shot.id} shot={shot} onClick={handleShotMarkerClick} />
-              ))}
+              {state.game.shots
+                .filter(shot => shot.period === state.game!.currentPeriod)
+                .map((shot) => (
+                  <ShotMarker key={shot.id} shot={shot} onClick={handleShotMarkerClick} />
+                ))}
             </Rink>
           </div>
 
