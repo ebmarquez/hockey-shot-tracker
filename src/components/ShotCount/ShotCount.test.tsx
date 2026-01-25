@@ -1,17 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Shot, Period } from '../../types';
-
-/**
- * Helper function to format period label
- * Mimics the logic from utils/periodStats.ts
- */
-const formatPeriodLabel = (period: Period): string => {
-  if (period === 'OT') {
-    return 'OT';
-  }
-  const suffix = period === 1 ? 'st' : period === 2 ? 'nd' : 'rd';
-  return `${period}${suffix} period`;
-};
+import { formatPeriodLabel } from '../../utils/periodStats';
 
 /**
  * Helper function to generate shot count message
@@ -53,44 +42,44 @@ describe('Shot Count Display', () => {
       createShot(2),
     ];
     const message = getShotCountMessage(shots, 1);
-    expect(message).toBe('2 shots recorded in 1st period');
+    expect(message).toBe('2 shots recorded in 1st Period');
   });
 
   it('should show 0 when no shots in period', () => {
     const shots: Shot[] = [];
     const message = getShotCountMessage(shots, 1);
-    expect(message).toBe('0 shots recorded in 1st period');
+    expect(message).toBe('0 shots recorded in 1st Period');
   });
 
   it('should display "1 shot" (singular) correctly', () => {
     const shots = [createShot(1)];
     const message = getShotCountMessage(shots, 1);
-    expect(message).toBe('1 shot recorded in 1st period');
+    expect(message).toBe('1 shot recorded in 1st Period');
     expect(message).not.toContain('1 shots');
   });
 
   it('should display "2 shots" (plural) correctly', () => {
     const shots = [createShot(1), createShot(1)];
     const message = getShotCountMessage(shots, 1);
-    expect(message).toBe('2 shots recorded in 1st period');
+    expect(message).toBe('2 shots recorded in 1st Period');
   });
 
   it('should display correct period name for 1st period', () => {
     const shots: Shot[] = [];
     const message = getShotCountMessage(shots, 1);
-    expect(message).toContain('1st period');
+    expect(message).toContain('1st Period');
   });
 
   it('should display correct period name for 2nd period', () => {
     const shots: Shot[] = [];
     const message = getShotCountMessage(shots, 2);
-    expect(message).toContain('2nd period');
+    expect(message).toContain('2nd Period');
   });
 
   it('should display correct period name for 3rd period', () => {
     const shots: Shot[] = [];
     const message = getShotCountMessage(shots, 3);
-    expect(message).toContain('3rd period');
+    expect(message).toContain('3rd Period');
   });
 
   it('should display correct period name for OT', () => {
@@ -109,28 +98,28 @@ describe('Shot Count Display', () => {
       createShot(3),
     ];
     const message = getShotCountMessage(shots, 2);
-    expect(message).toBe('3 shots recorded in 2nd period');
+    expect(message).toBe('3 shots recorded in 2nd Period');
   });
 
   it('should update when shot is added', () => {
     let shots = [createShot(1)];
     let message = getShotCountMessage(shots, 1);
-    expect(message).toBe('1 shot recorded in 1st period');
+    expect(message).toBe('1 shot recorded in 1st Period');
 
     // Add another shot
     shots = [...shots, createShot(1)];
     message = getShotCountMessage(shots, 1);
-    expect(message).toBe('2 shots recorded in 1st period');
+    expect(message).toBe('2 shots recorded in 1st Period');
   });
 
   it('should update when shot is deleted', () => {
     let shots = [createShot(1), createShot(1)];
     let message = getShotCountMessage(shots, 1);
-    expect(message).toBe('2 shots recorded in 1st period');
+    expect(message).toBe('2 shots recorded in 1st Period');
 
     // Remove a shot
     shots = shots.slice(0, 1);
     message = getShotCountMessage(shots, 1);
-    expect(message).toBe('1 shot recorded in 1st period');
+    expect(message).toBe('1 shot recorded in 1st Period');
   });
 });

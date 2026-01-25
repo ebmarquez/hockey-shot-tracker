@@ -380,7 +380,7 @@ const GameView: React.FC = () => {
                 shot => shot.period === state.game!.currentPeriod
               ).length;
               const shotWord = currentPeriodShots === 1 ? 'shot' : 'shots';
-              const periodLabel = formatPeriodLabel(state.game!.currentPeriod).toLowerCase();
+              const periodLabel = formatPeriodLabel(state.game!.currentPeriod);
               return `${currentPeriodShots} ${shotWord} recorded in ${periodLabel}`;
             })()}
           </div>
