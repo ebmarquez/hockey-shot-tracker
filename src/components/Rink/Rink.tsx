@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { usePinchZoom } from '../../hooks/usePinchZoom';
 
 interface RinkProps {
@@ -16,18 +16,22 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [startTouch, setStartTouch] = useState<{ x: number; y: number } | null>(null);
+  // Transform origin for pinch zoom centering
+  const [transformOrigin, setTransformOrigin] = useState('center center');
   
   // Pinch-to-zoom state with callback for pan offset reset
-  const handleScaleChange = (newScale: number, didReset: boolean) => {
-    // Reset pan offset when zooming back to 1x
-    if (didReset || newScale <= 1.1) {
+  const handleScaleChange = useCallback((newScale: number, didReset: boolean) => {
+    // Reset pan offset when zooming back to 1x (didReset indicates scale was snapped to minScale)
+    if (didReset) {
       setOffset({ x: 0, y: 0 });
+      setTransformOrigin('center center');
     }
-  };
+  }, []);
 
   const {
     scale,
     isPinching,
+    pinchCenter,
     handlePinchStart,
     handlePinchMove,
     handlePinchEnd,
@@ -37,6 +41,16 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
     resetThreshold: 0.1,
     onScaleChange: handleScaleChange,
   });
+
+  // Update transform origin when pinch center changes
+  useEffect(() => {
+    if (pinchCenter && rinkRef.current) {
+      const rect = rinkRef.current.getBoundingClientRect();
+      const originX = ((pinchCenter.x - rect.left) / rect.width) * 100;
+      const originY = ((pinchCenter.y - rect.top) / rect.height) * 100;
+      setTransformOrigin(`${originX}% ${originY}%`);
+    }
+  }, [pinchCenter]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -67,7 +81,8 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
-      // Two-finger pinch gesture
+      // Two-finger pinch gesture - clear startTouch to avoid unexpected pan behavior
+      setStartTouch(null);
       handlePinchStart(e.touches);
     } else if (e.touches.length === 1 && scale > 1) {
       setStartTouch({ x: e.touches[0].clientX, y: e.touches[0].clientY });
@@ -162,7 +177,7 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
         onTouchEnd={handleTouchEnd}
         style={{
           transform: `scale(${scale}) translate(${offset.x}px, ${offset.y}px)`,
-          transformOrigin: 'center center',
+          transformOrigin: transformOrigin,
           transition: isPanning || isPinching ? 'none' : 'transform 0.2s ease-out',
           touchAction: scale > 1 ? 'none' : 'auto'
         }}

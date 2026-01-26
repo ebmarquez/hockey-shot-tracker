@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { usePinchZoom } from './usePinchZoom';
 
@@ -414,6 +414,108 @@ describe('usePinchZoom', () => {
       });
 
       expect(result.current.scale).toBe(4);
+    });
+  });
+
+  describe('onScaleChange Callback', () => {
+    it('should call onScaleChange with correct scale and didReset=true when resetting', () => {
+      const onScaleChange = vi.fn();
+      const { result } = renderHook(() =>
+        usePinchZoom({ minScale: 1, resetThreshold: 0.2, onScaleChange })
+      );
+
+      // Start pinch
+      const startTouches = createMockTouches(100, 150, 200, 150);
+      act(() => {
+        result.current.handlePinchStart(startTouches);
+      });
+
+      // Small zoom within reset threshold
+      const smallZoomTouches = createMockTouches(98, 150, 207, 150);
+      act(() => {
+        result.current.handlePinchMove(smallZoomTouches);
+      });
+
+      // End pinch - should trigger reset
+      act(() => {
+        result.current.handlePinchEnd();
+      });
+
+      expect(onScaleChange).toHaveBeenCalledWith(1, true);
+    });
+
+    it('should call onScaleChange with correct scale and didReset=false when not resetting', () => {
+      const onScaleChange = vi.fn();
+      const { result } = renderHook(() =>
+        usePinchZoom({ minScale: 1, maxScale: 3, resetThreshold: 0.1, onScaleChange })
+      );
+
+      // Start pinch
+      const startTouches = createMockTouches(100, 150, 200, 150);
+      act(() => {
+        result.current.handlePinchStart(startTouches);
+      });
+
+      // Zoom to 1.5x (above reset threshold)
+      const zoomTouches = createMockTouches(75, 150, 225, 150);
+      act(() => {
+        result.current.handlePinchMove(zoomTouches);
+      });
+
+      // End pinch
+      act(() => {
+        result.current.handlePinchEnd();
+      });
+
+      expect(onScaleChange).toHaveBeenCalledWith(1.5, false);
+    });
+
+    it('should call onScaleChange with didReset=true when resetZoom is called', () => {
+      const onScaleChange = vi.fn();
+      const { result } = renderHook(() =>
+        usePinchZoom({ minScale: 1, onScaleChange })
+      );
+
+      // First zoom to 2x
+      const startTouches = createMockTouches(100, 150, 200, 150);
+      act(() => {
+        result.current.handlePinchStart(startTouches);
+      });
+
+      const zoomTouches = createMockTouches(50, 150, 250, 150);
+      act(() => {
+        result.current.handlePinchMove(zoomTouches);
+      });
+
+      act(() => {
+        result.current.handlePinchEnd();
+      });
+
+      onScaleChange.mockClear();
+
+      // Call resetZoom
+      act(() => {
+        result.current.resetZoom();
+      });
+
+      expect(onScaleChange).toHaveBeenCalledWith(1, true);
+    });
+
+    it('should not call onScaleChange when callback is not provided', () => {
+      const { result } = renderHook(() => usePinchZoom());
+
+      // Start pinch
+      const startTouches = createMockTouches(100, 150, 200, 150);
+      act(() => {
+        result.current.handlePinchStart(startTouches);
+      });
+
+      // End pinch - should not throw
+      expect(() => {
+        act(() => {
+          result.current.handlePinchEnd();
+        });
+      }).not.toThrow();
     });
   });
 });

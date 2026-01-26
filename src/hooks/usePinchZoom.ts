@@ -138,7 +138,12 @@ export function usePinchZoom(options: UsePinchZoomOptions = {}): UsePinchZoomRet
     });
     initialDistanceRef.current = null;
     initialScaleRef.current = minScale;
-  }, [minScale]);
+    
+    // Notify parent of scale reset if callback provided
+    if (onScaleChange) {
+      onScaleChange(minScale, true);
+    }
+  }, [minScale, onScaleChange]);
 
   return {
     scale: state.scale,
