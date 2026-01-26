@@ -143,6 +143,25 @@ const GameView: React.FC = () => {
     setShotToDelete(shot);
   };
 
+  // Helper functions for shot list
+  const formatTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { 
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
+  const formatPeriodShort = (period: number | 'OT') => {
+    if (period === 'OT') return 'OT';
+    if (period === 1) return '1st';
+    if (period === 2) return '2nd';
+    if (period === 3) return '3rd';
+    return `${period}`;
+  };
+
   const handlePeriodChange = (period: Period) => {
     setPeriod(period);
     
@@ -462,7 +481,7 @@ const GameView: React.FC = () => {
             </div>
 
             {/* Shot List - Only visible in remove mode */}
-            {isRemoveShotMode && (
+            {isRemoveShotMode && state.game && (
               <div className="p-4">
                 <div className="text-sm font-semibold text-gray-700 mb-3">
                   Select a shot to remove:
@@ -472,24 +491,6 @@ const GameView: React.FC = () => {
                     .slice()
                     .reverse()
                     .map((shot) => {
-                      const formatTime = (timestamp: number) => {
-                        const date = new Date(timestamp);
-                        return date.toLocaleTimeString('en-US', { 
-                          hour12: false,
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit'
-                        });
-                      };
-
-                      const formatPeriod = (period: number | 'OT') => {
-                        if (period === 'OT') return 'OT';
-                        if (period === 1) return '1st';
-                        if (period === 2) return '2nd';
-                        if (period === 3) return '3rd';
-                        return `${period}`;
-                      };
-
                       const teamName = shot.team === 'home' ? state.game!.homeTeam : state.game!.awayTeam;
                       const isGoal = shot.result === 'goal';
 
@@ -514,7 +515,7 @@ const GameView: React.FC = () => {
                                 )}
                               </div>
                               <div className="text-sm text-gray-600 mt-1">
-                                {formatPeriod(shot.period)} • {formatTime(shot.timestamp)} • {shot.shotType} • {shot.result}
+                                {formatPeriodShort(shot.period)} • {formatTime(shot.timestamp)} • {shot.shotType} • {shot.result}
                               </div>
                             </div>
                             <svg className="w-5 h-5 text-red-500 flex-shrink-0 ml-2" viewBox="0 0 24 24" fill="currentColor">
