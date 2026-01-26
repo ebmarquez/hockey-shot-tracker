@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 interface RinkProps {
   onShotLocation: (x: number, y: number) => void;
@@ -9,12 +9,95 @@ interface RinkProps {
 
 const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awayTeamName }) => {
   const rinkRef = useRef<HTMLDivElement>(null);
+  
+  // Pan state
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [startTouch, setStartTouch] = useState<{ x: number; y: number } | null>(null);
+  
+  // Scale state (placeholder until Issue #13 pinch-to-zoom is implemented)
+  const [scale] = useState(1);
+
+  /**
+   * Constrain pan offset to rink boundaries
+   */
+  const constrainToBounds = (newOffset: { x: number; y: number }, currentScale: number, containerSize: { width: number; height: number }): { x: number; y: number } => {
+    if (currentScale <= 1) {
+      return { x: 0, y: 0 };
+    }
+    
+    // Calculate maximum offset based on scale
+    const maxOffsetX = (containerSize.width * (currentScale - 1)) / 2;
+    const maxOffsetY = (containerSize.height * (currentScale - 1)) / 2;
+    
+    return {
+      x: Math.max(-maxOffsetX, Math.min(maxOffsetX, newOffset.x)),
+      y: Math.max(-maxOffsetY, Math.min(maxOffsetY, newOffset.y))
+    };
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && scale > 1) {
+      setStartTouch({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+      setIsPanning(false);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && startTouch && scale > 1 && rinkRef.current) {
+      const dx = e.touches[0].clientX - startTouch.x;
+      const dy = e.touches[0].clientY - startTouch.y;
+      
+      // Apply movement threshold to distinguish tap from pan
+      const MOVEMENT_THRESHOLD = 10;
+      if (!isPanning && (Math.abs(dx) > MOVEMENT_THRESHOLD || Math.abs(dy) > MOVEMENT_THRESHOLD)) {
+        setIsPanning(true);
+      }
+      
+      if (isPanning) {
+        const rect = rinkRef.current.getBoundingClientRect();
+        const newOffset = constrainToBounds(
+          { x: offset.x + dx, y: offset.y + dy },
+          scale,
+          { width: rect.width, height: rect.height }
+        );
+        setOffset(newOffset);
+        setStartTouch({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+        e.preventDefault(); // Prevent scrolling while panning
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setStartTouch(null);
+    // Keep isPanning state for a brief moment to prevent tap from triggering shot placement
+    setTimeout(() => setIsPanning(false), 50);
+  };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Don't register click if we were just panning
+    if (isPanning) {
+      return;
+    }
+    
     if (rinkRef.current) {
       const rect = rinkRef.current.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      
+      // Account for pan offset when zoomed
+      let x = ((e.clientX - rect.left) / rect.width) * 100;
+      let y = ((e.clientY - rect.top) / rect.height) * 100;
+      
+      if (scale > 1) {
+        // Adjust coordinates for pan offset
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const clickOffsetX = (e.clientX - rect.left) - centerX;
+        const clickOffsetY = (e.clientY - rect.top) - centerY;
+        
+        // Compensate for scale and pan
+        x = ((clickOffsetX - offset.x) / scale + centerX) / rect.width * 100;
+        y = ((clickOffsetY - offset.y) / scale + centerY) / rect.height * 100;
+      }
       
       onShotLocation(
         Math.max(0, Math.min(100, x)),
@@ -24,11 +107,19 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full overflow-hidden">
       <div 
         ref={rinkRef}
         className="relative cursor-crosshair"
         onClick={handleClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          transform: `scale(${scale}) translate(${offset.x}px, ${offset.y}px)`,
+          transformOrigin: 'center center',
+          transition: isPanning ? 'none' : 'transform 0.2s ease-out'
+        }}
       >
         <svg
           viewBox="0 0 200 85"
