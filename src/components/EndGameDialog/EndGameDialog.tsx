@@ -38,8 +38,7 @@ const EndGameDialog: React.FC<EndGameDialogProps> = ({
     // Prevent body scroll when modal is open
     document.body.style.overflow = 'hidden';
 
-    // Focus the close button on open
-    closeButtonRef.current?.focus();
+    // Do not force initial focus onto the secondary Close action
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
