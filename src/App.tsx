@@ -5,6 +5,7 @@ import Rink from './components/Rink/Rink';
 import ShotMarker from './components/ShotMarker/ShotMarker';
 import ShotForm from './components/ShotForm/ShotForm';
 import DeleteShotDialog from './components/DeleteShotDialog/DeleteShotDialog';
+import EndGameDialog from './components/EndGameDialog/EndGameDialog';
 import GameSummary from './components/GameSummary/GameSummary';
 import type { Shot, ShotType, ShotResult, Period, Team } from './types';
 import { calculateShootingPercentage } from './utils/shootingPercentage';
@@ -19,6 +20,7 @@ const GameView: React.FC = () => {
   const [editValue, setEditValue] = useState('');
   const [shotToDelete, setShotToDelete] = useState<Shot | null>(null);
   const [showSummary, setShowSummary] = useState(false);
+  const [showEndGameDialog, setShowEndGameDialog] = useState(false);
 
   // Auto-start game with default teams if not active
   React.useEffect(() => {
@@ -60,9 +62,22 @@ const GameView: React.FC = () => {
   };
 
   const handleEndGame = () => {
-    if (confirm('End game and start fresh?')) {
-      resetGame();
-    }
+    setShowEndGameDialog(true);
+  };
+
+  const handleEndGameClose = () => {
+    setShowEndGameDialog(false);
+  };
+
+  const handleEndGameViewSummary = () => {
+    setShowEndGameDialog(false);
+    setShowSummary(true);
+  };
+
+  const handleEndGameNewGame = () => {
+    setShowEndGameDialog(false);
+    resetGame();
+    showToast('New game started', 'info');
   };
 
   const handleEditTeamName = (team: Team) => {
@@ -434,6 +449,17 @@ const GameView: React.FC = () => {
         <GameSummary
           isOpen={showSummary}
           onClose={() => setShowSummary(false)}
+          game={state.game}
+        />
+      )}
+
+      {/* End Game Dialog */}
+      {state.game && (
+        <EndGameDialog
+          isOpen={showEndGameDialog}
+          onClose={handleEndGameClose}
+          onViewSummary={handleEndGameViewSummary}
+          onNewGame={handleEndGameNewGame}
           game={state.game}
         />
       )}
