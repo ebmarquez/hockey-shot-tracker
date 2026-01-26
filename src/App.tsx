@@ -21,6 +21,7 @@ const GameView: React.FC = () => {
   const [shotToDelete, setShotToDelete] = useState<Shot | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [showEndGameDialog, setShowEndGameDialog] = useState(false);
+  const [isRemoveShotMode, setIsRemoveShotMode] = useState(false);
 
   // Auto-start game with default teams if not active
   React.useEffect(() => {
@@ -112,7 +113,10 @@ const GameView: React.FC = () => {
   };
 
   const handleShotMarkerClick = (shot: Shot) => {
-    setShotToDelete(shot);
+    // Only allow deletion when in remove shot mode
+    if (isRemoveShotMode) {
+      setShotToDelete(shot);
+    }
   };
 
   const handleDeleteConfirm = () => {
@@ -126,6 +130,17 @@ const GameView: React.FC = () => {
 
   const handleDeleteCancel = () => {
     setShotToDelete(null);
+  };
+
+  const toggleRemoveShotMode = () => {
+    setIsRemoveShotMode(!isRemoveShotMode);
+    if (!isRemoveShotMode) {
+      showToast('Tap a shot on the rink or select from the list below', 'info');
+    }
+  };
+
+  const handleShotListItemClick = (shot: Shot) => {
+    setShotToDelete(shot);
   };
 
   const handlePeriodChange = (period: Period) => {
@@ -394,7 +409,7 @@ const GameView: React.FC = () => {
               {state.game.shots
                 .filter(shot => shot.period === state.game!.currentPeriod)
                 .map((shot) => (
-                  <ShotMarker key={shot.id} shot={shot} onClick={handleShotMarkerClick} />
+                  <ShotMarker key={shot.id} shot={shot} onClick={handleShotMarkerClick} isDeletable={isRemoveShotMode} />
                 ))}
             </Rink>
           </div>
@@ -426,6 +441,94 @@ const GameView: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Remove Shot Mode */}
+        {state.game.shots.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200 mt-4">
+            <div className="p-4 border-b border-gray-100">
+              <button
+                onClick={toggleRemoveShotMode}
+                className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-semibold text-sm transition-colors min-h-[56px] ${
+                  isRemoveShotMode
+                    ? 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300 border border-gray-300'
+                }`}
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+                {isRemoveShotMode ? 'Cancel Remove Shot' : 'Remove Shot'}
+              </button>
+            </div>
+
+            {/* Shot List - Only visible in remove mode */}
+            {isRemoveShotMode && (
+              <div className="p-4">
+                <div className="text-sm font-semibold text-gray-700 mb-3">
+                  Select a shot to remove:
+                </div>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {state.game.shots
+                    .slice()
+                    .reverse()
+                    .map((shot) => {
+                      const formatTime = (timestamp: number) => {
+                        const date = new Date(timestamp);
+                        return date.toLocaleTimeString('en-US', { 
+                          hour12: false,
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit'
+                        });
+                      };
+
+                      const formatPeriod = (period: number | 'OT') => {
+                        if (period === 'OT') return 'OT';
+                        if (period === 1) return '1st';
+                        if (period === 2) return '2nd';
+                        if (period === 3) return '3rd';
+                        return `${period}`;
+                      };
+
+                      const teamName = shot.team === 'home' ? state.game!.homeTeam : state.game!.awayTeam;
+                      const isGoal = shot.result === 'goal';
+
+                      return (
+                        <button
+                          key={shot.id}
+                          onClick={() => handleShotListItemClick(shot)}
+                          className={`w-full text-left p-3 rounded-lg border transition-colors min-h-[56px] ${
+                            isGoal
+                              ? 'border-yellow-300 bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200'
+                              : 'border-gray-300 bg-white hover:bg-gray-50 active:bg-gray-100'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-gray-900">{teamName}</span>
+                                {isGoal && (
+                                  <span className="text-xs font-bold text-yellow-700 bg-yellow-200 px-2 py-0.5 rounded">
+                                    GOAL
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                {formatPeriod(shot.period)} • {formatTime(shot.timestamp)} • {shot.shotType} • {shot.result}
+                              </div>
+                            </div>
+                            <svg className="w-5 h-5 text-red-500 flex-shrink-0 ml-2" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </svg>
+                          </div>
+                        </button>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
       {/* Shot Form Modal */}

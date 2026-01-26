@@ -4,9 +4,10 @@ import type { Shot } from '../../types';
 interface ShotMarkerProps {
   shot: Shot;
   onClick?: (shot: Shot) => void;
+  isDeletable?: boolean;
 }
 
-const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick }) => {
+const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick, isDeletable = false }) => {
   const isGoal = shot.result === 'goal';
   const isHome = shot.team === 'home';
 
@@ -16,15 +17,15 @@ const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick }) => {
 
   return (
     <div
-      className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto cursor-pointer"
+      className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${isDeletable ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}`}
       style={{
         left: `${shot.x}%`,
         top: `${shot.y}%`,
         minWidth: '44px',
         minHeight: '44px',
       }}
-      onClick={() => onClick?.(shot)}
-      title={`${shot.team} - ${shot.result} (${shot.shotType})`}
+      onClick={() => isDeletable && onClick?.(shot)}
+      title={isDeletable ? `Click to delete: ${shot.team} - ${shot.result} (${shot.shotType})` : `${shot.team} - ${shot.result} (${shot.shotType})`}
     >
       <div className="flex items-center justify-center w-full h-full">
         <svg width="24" height="24" viewBox="0 0 24 24">
@@ -49,6 +50,18 @@ const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick }) => {
             stroke={strokeColor}
             strokeWidth="2"
           />
+          {/* Delete indicator when in delete mode */}
+          {isDeletable && (
+            <g transform="translate(12, 12)">
+              <circle cx="0" cy="0" r="10" fill="rgba(239, 68, 68, 0.2)" />
+              <path 
+                d="M-3,-3 L3,3 M3,-3 L-3,3" 
+                stroke="#ef4444" 
+                strokeWidth="2" 
+                strokeLinecap="round"
+              />
+            </g>
+          )}
         </svg>
       </div>
     </div>
