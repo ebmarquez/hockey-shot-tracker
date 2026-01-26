@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { usePinchZoom } from '../../hooks/usePinchZoom';
 
 interface RinkProps {
   onShotLocation: (x: number, y: number) => void;
@@ -16,8 +17,26 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   const [isPanning, setIsPanning] = useState(false);
   const [startTouch, setStartTouch] = useState<{ x: number; y: number } | null>(null);
   
-  // Scale state (placeholder until Issue #13 pinch-to-zoom is implemented)
-  const [scale] = useState(1);
+  // Pinch-to-zoom state with callback for pan offset reset
+  const handleScaleChange = (newScale: number, didReset: boolean) => {
+    // Reset pan offset when zooming back to 1x
+    if (didReset || newScale <= 1.1) {
+      setOffset({ x: 0, y: 0 });
+    }
+  };
+
+  const {
+    scale,
+    isPinching,
+    handlePinchStart,
+    handlePinchMove,
+    handlePinchEnd,
+  } = usePinchZoom({ 
+    minScale: 1, 
+    maxScale: 3, 
+    resetThreshold: 0.1,
+    onScaleChange: handleScaleChange,
+  });
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -47,14 +66,21 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1 && scale > 1) {
+    if (e.touches.length === 2) {
+      // Two-finger pinch gesture
+      handlePinchStart(e.touches);
+    } else if (e.touches.length === 1 && scale > 1) {
       setStartTouch({ x: e.touches[0].clientX, y: e.touches[0].clientY });
       setIsPanning(false);
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 1 && startTouch && scale > 1 && rinkRef.current) {
+    if (e.touches.length === 2) {
+      // Two-finger pinch gesture
+      handlePinchMove(e.touches);
+      e.preventDefault(); // Prevent scrolling during pinch
+    } else if (e.touches.length === 1 && startTouch && scale > 1 && rinkRef.current) {
       const dx = e.touches[0].clientX - startTouch.x;
       const dy = e.touches[0].clientY - startTouch.y;
       
@@ -79,6 +105,12 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   };
 
   const handleTouchEnd = () => {
+    // Handle pinch end if we were pinching
+    if (isPinching) {
+      handlePinchEnd();
+      // Note: Pan offset reset is handled by onScaleChange callback
+    }
+    
     setStartTouch(null);
     // Keep isPanning state for a brief moment to prevent tap from triggering shot placement
     if (panTimeoutRef.current) {
@@ -88,8 +120,8 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Don't register click if we were just panning
-    if (isPanning) {
+    // Don't register click if we were just panning or pinching
+    if (isPanning || isPinching) {
       return;
     }
     
@@ -131,7 +163,8 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
         style={{
           transform: `scale(${scale}) translate(${offset.x}px, ${offset.y}px)`,
           transformOrigin: 'center center',
-          transition: isPanning ? 'none' : 'transform 0.2s ease-out'
+          transition: isPanning || isPinching ? 'none' : 'transform 0.2s ease-out',
+          touchAction: scale > 1 ? 'none' : 'auto'
         }}
       >
         <svg
