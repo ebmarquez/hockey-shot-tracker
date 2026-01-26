@@ -322,6 +322,15 @@ describe('GameSummary', () => {
 
       expect(screen.getByText('Export PDF')).toBeInTheDocument();
     });
+
+    it('should display Share button', () => {
+      const game = createMockGame();
+      const onClose = vi.fn();
+
+      render(<GameSummary isOpen={true} onClose={onClose} game={game} />);
+
+      expect(screen.getByLabelText('Share game summary')).toBeInTheDocument();
+    });
   });
 
   describe('Accessibility', () => {
