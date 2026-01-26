@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 interface RinkProps {
   onShotLocation: (x: number, y: number) => void;
@@ -9,6 +9,7 @@ interface RinkProps {
 
 const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awayTeamName }) => {
   const rinkRef = useRef<HTMLDivElement>(null);
+  const panTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Pan state
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -17,6 +18,15 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   
   // Scale state (placeholder until Issue #13 pinch-to-zoom is implemented)
   const [scale] = useState(1);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (panTimeoutRef.current) {
+        clearTimeout(panTimeoutRef.current);
+      }
+    };
+  }, []);
 
   /**
    * Constrain pan offset to rink boundaries
@@ -71,7 +81,10 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   const handleTouchEnd = () => {
     setStartTouch(null);
     // Keep isPanning state for a brief moment to prevent tap from triggering shot placement
-    setTimeout(() => setIsPanning(false), 50);
+    if (panTimeoutRef.current) {
+      clearTimeout(panTimeoutRef.current);
+    }
+    panTimeoutRef.current = setTimeout(() => setIsPanning(false), 50);
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {

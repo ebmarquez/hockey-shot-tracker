@@ -164,11 +164,11 @@ describe('Rink Pan Gestures', () => {
 
   describe('Pan State Readiness', () => {
     it('should be ready for future zoom integration', () => {
-      render(
+      const { container } = render(
         <Rink onShotLocation={mockOnShotLocation} />
       );
       
-      const rinkElement = document.querySelector('.cursor-crosshair') as HTMLElement;
+      const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
       
       // Should have transform property ready for scale changes
       expect(rinkElement.style.transform).toBeDefined();
