@@ -162,16 +162,11 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
       const relX = clickX - centerX;
       const relY = clickY - centerY;
       
-      // Remove the translate effect (offset is in pixels of the scaled space)
-      const afterTranslate = {
-        x: relX - offset.x,
-        y: relY - offset.y
-      };
-      
-      // Inverse scale
+      // getBoundingClientRect() already includes the current translate offset,
+      // so we only need to undo the scaling here.
       const afterScale = {
-        x: afterTranslate.x / scale,
-        y: afterTranslate.y / scale
+        x: relX / scale,
+        y: relY / scale
       };
       
       // Convert back to absolute position (relative to original unscaled element)
