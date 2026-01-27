@@ -143,21 +143,46 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
     if (rinkRef.current) {
       const rect = rinkRef.current.getBoundingClientRect();
       
-      // Account for pan offset when zoomed
-      let x = ((e.clientX - rect.left) / rect.width) * 100;
-      let y = ((e.clientY - rect.top) / rect.height) * 100;
+      // Get click position relative to the transformed element's bounding box
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
       
-      if (scale > 1) {
-        // Adjust coordinates for pan offset
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const clickOffsetX = (e.clientX - rect.left) - centerX;
-        const clickOffsetY = (e.clientY - rect.top) - centerY;
-        
-        // Compensate for scale and pan
-        x = ((clickOffsetX - offset.x) / scale + centerX) / rect.width * 100;
-        y = ((clickOffsetY - offset.y) / scale + centerY) / rect.height * 100;
-      }
+      // The transform is: scale(s) translate(dx, dy) with transform-origin at center
+      // To invert this transformation:
+      // 1. The getBoundingClientRect() gives us the bounding box AFTER transform
+      // 2. Click position is relative to this transformed bounding box
+      // 3. To get original coordinates:
+      //    - The center of the transformed element stays at rect.width/2, rect.height/2
+      //    - We need to: subtract translate offset, then divide by scale, accounting for origin
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      // Position relative to center of transformed element
+      const relX = clickX - centerX;
+      const relY = clickY - centerY;
+      
+      // Remove the translate effect (offset is in pixels of the scaled space)
+      const afterTranslate = {
+        x: relX - offset.x,
+        y: relY - offset.y
+      };
+      
+      // Inverse scale
+      const afterScale = {
+        x: afterTranslate.x / scale,
+        y: afterTranslate.y / scale
+      };
+      
+      // Convert back to absolute position (relative to original unscaled element)
+      const originalWidth = rect.width / scale;
+      const originalHeight = rect.height / scale;
+      const originalX = afterScale.x + originalWidth / 2;
+      const originalY = afterScale.y + originalHeight / 2;
+      
+      // Convert to percentage (0-100)
+      const x = (originalX / originalWidth) * 100;
+      const y = (originalY / originalHeight) * 100;
       
       onShotLocation(
         Math.max(0, Math.min(100, x)),
