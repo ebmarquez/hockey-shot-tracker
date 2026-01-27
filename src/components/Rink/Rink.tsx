@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { usePinchZoom } from '../../hooks/usePinchZoom';
 
 interface RinkProps {
   onShotLocation: (x: number, y: number) => void;
@@ -15,9 +16,41 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [startTouch, setStartTouch] = useState<{ x: number; y: number } | null>(null);
+  // Transform origin for pinch zoom centering
+  const [transformOrigin, setTransformOrigin] = useState('center center');
   
-  // Scale state (placeholder until Issue #13 pinch-to-zoom is implemented)
-  const [scale] = useState(1);
+  // Pinch-to-zoom state with callback for pan offset reset
+  const handleScaleChange = useCallback((newScale: number, didReset: boolean) => {
+    // Reset pan offset when zooming back to 1x (didReset indicates scale was snapped to minScale)
+    if (didReset) {
+      setOffset({ x: 0, y: 0 });
+      setTransformOrigin('center center');
+    }
+  }, []);
+
+  const {
+    scale,
+    isPinching,
+    pinchCenter,
+    handlePinchStart,
+    handlePinchMove,
+    handlePinchEnd,
+  } = usePinchZoom({ 
+    minScale: 1, 
+    maxScale: 3, 
+    resetThreshold: 0.1,
+    onScaleChange: handleScaleChange,
+  });
+
+  // Update transform origin when pinch center changes
+  useEffect(() => {
+    if (pinchCenter && rinkRef.current) {
+      const rect = rinkRef.current.getBoundingClientRect();
+      const originX = ((pinchCenter.x - rect.left) / rect.width) * 100;
+      const originY = ((pinchCenter.y - rect.top) / rect.height) * 100;
+      setTransformOrigin(`${originX}% ${originY}%`);
+    }
+  }, [pinchCenter]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -47,14 +80,22 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1 && scale > 1) {
+    if (e.touches.length === 2) {
+      // Two-finger pinch gesture - clear startTouch to avoid unexpected pan behavior
+      setStartTouch(null);
+      handlePinchStart(e.touches);
+    } else if (e.touches.length === 1 && scale > 1) {
       setStartTouch({ x: e.touches[0].clientX, y: e.touches[0].clientY });
       setIsPanning(false);
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 1 && startTouch && scale > 1 && rinkRef.current) {
+    if (e.touches.length === 2) {
+      // Two-finger pinch gesture
+      handlePinchMove(e.touches);
+      e.preventDefault(); // Prevent scrolling during pinch
+    } else if (e.touches.length === 1 && startTouch && scale > 1 && rinkRef.current) {
       const dx = e.touches[0].clientX - startTouch.x;
       const dy = e.touches[0].clientY - startTouch.y;
       
@@ -79,6 +120,12 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   };
 
   const handleTouchEnd = () => {
+    // Handle pinch end if we were pinching
+    if (isPinching) {
+      handlePinchEnd();
+      // Note: Pan offset reset is handled by onScaleChange callback
+    }
+    
     setStartTouch(null);
     // Keep isPanning state for a brief moment to prevent tap from triggering shot placement
     if (panTimeoutRef.current) {
@@ -88,8 +135,8 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Don't register click if we were just panning
-    if (isPanning) {
+    // Don't register click if we were just panning or pinching
+    if (isPanning || isPinching) {
       return;
     }
     
@@ -130,8 +177,9 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
         onTouchEnd={handleTouchEnd}
         style={{
           transform: `scale(${scale}) translate(${offset.x}px, ${offset.y}px)`,
-          transformOrigin: 'center center',
-          transition: isPanning ? 'none' : 'transform 0.2s ease-out'
+          transformOrigin: transformOrigin,
+          transition: isPanning || isPinching ? 'none' : 'transform 0.2s ease-out',
+          touchAction: scale > 1 ? 'none' : 'auto'
         }}
       >
         <svg
