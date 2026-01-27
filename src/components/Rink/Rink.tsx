@@ -20,7 +20,7 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   const [transformOrigin, setTransformOrigin] = useState('center center');
   
   // Pinch-to-zoom state with callback for pan offset reset
-  const handleScaleChange = useCallback((newScale: number, didReset: boolean) => {
+  const handleScaleChange = useCallback((_newScale: number, didReset: boolean) => {
     // Reset pan offset when zooming back to 1x (didReset indicates scale was snapped to minScale)
     if (didReset) {
       setOffset({ x: 0, y: 0 });
@@ -83,7 +83,7 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
     if (e.touches.length === 2) {
       // Two-finger pinch gesture - clear startTouch to avoid unexpected pan behavior
       setStartTouch(null);
-      handlePinchStart(e.touches);
+      handlePinchStart(e.nativeEvent.touches);
     } else if (e.touches.length === 1 && scale > 1) {
       setStartTouch({ x: e.touches[0].clientX, y: e.touches[0].clientY });
       setIsPanning(false);
@@ -93,7 +93,7 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
   const handleTouchMove = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       // Two-finger pinch gesture
-      handlePinchMove(e.touches);
+      handlePinchMove(e.nativeEvent.touches);
       e.preventDefault(); // Prevent scrolling during pinch
     } else if (e.touches.length === 1 && startTouch && scale > 1 && rinkRef.current) {
       const dx = e.touches[0].clientX - startTouch.x;
