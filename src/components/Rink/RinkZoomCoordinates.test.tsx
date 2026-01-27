@@ -355,20 +355,11 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
       });
 
       // Now try to click while panning state might still be active
-      const rect = { left: 100, top: 100, width: 1200, height: 600 };
-      vi.spyOn(rinkElement, 'getBoundingClientRect').mockReturnValue({
-        ...rect,
-        right: rect.left + rect.width,
-        bottom: rect.top + rect.height,
-        x: rect.left,
-        y: rect.top,
-        toJSON: () => ({}),
-      } as DOMRect);
-
-      fireEvent.click(rinkElement, {
-        clientX: 700,
-        clientY: 400,
-      });
+      simulateClick(
+        rinkElement,
+        { left: 100, top: 100, width: 1200, height: 600 },
+        { x: 700, y: 400 }
+      );
 
       // The click during pan should be blocked
       // (Note: There's a 50ms timeout in the component, so this may be timing-dependent)
@@ -402,34 +393,34 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
   });
 
   describe('Various Zoom Levels', () => {
-    const zoomLevels = [1, 1.2, 1.5, 2, 2.5, 3];
+    it.each([
+      { scale: 1, label: '1x' },
+      { scale: 1.2, label: '1.2x' },
+      { scale: 1.5, label: '1.5x' },
+      { scale: 2, label: '2x' },
+      { scale: 2.5, label: '2.5x' },
+      { scale: 3, label: '3x' },
+    ])('should handle zoom level $label consistently', ({ scale }) => {
+      mockUsePinchZoom(scale);
 
-    zoomLevels.forEach((scale) => {
-      it(`should handle zoom level ${scale}x consistently`, () => {
-        mockOnShotLocation.mockClear();
-        mockUsePinchZoom(scale);
+      const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
+      const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
 
-        const { container, unmount } = render(<Rink onShotLocation={mockOnShotLocation} />);
-        const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
+      const scaledWidth = 600 * scale;
+      const scaledHeight = 300 * scale;
 
-        const scaledWidth = 600 * scale;
-        const scaledHeight = 300 * scale;
+      // Click at center of scaled element
+      simulateClick(
+        rinkElement,
+        { left: 100, top: 100, width: scaledWidth, height: scaledHeight },
+        { x: 100 + scaledWidth / 2, y: 100 + scaledHeight / 2 }
+      );
 
-        // Click at center of scaled element
-        simulateClick(
-          rinkElement,
-          { left: 100, top: 100, width: scaledWidth, height: scaledHeight },
-          { x: 100 + scaledWidth / 2, y: 100 + scaledHeight / 2 }
-        );
-
-        // Center should always map to 50%, 50% regardless of zoom
-        expect(mockOnShotLocation).toHaveBeenCalledWith(
-          expect.closeTo(50, 0.1),
-          expect.closeTo(50, 0.1)
-        );
-
-        unmount();
-      });
+      // Center should always map to 50%, 50% regardless of zoom
+      expect(mockOnShotLocation).toHaveBeenCalledWith(
+        expect.closeTo(50, 0.1),
+        expect.closeTo(50, 0.1)
+      );
     });
   });
 });
