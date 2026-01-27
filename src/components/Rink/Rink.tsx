@@ -143,21 +143,41 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
     if (rinkRef.current) {
       const rect = rinkRef.current.getBoundingClientRect();
       
-      // Account for pan offset when zoomed
-      let x = ((e.clientX - rect.left) / rect.width) * 100;
-      let y = ((e.clientY - rect.top) / rect.height) * 100;
+      // Get click position relative to the transformed element's bounding box
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
       
-      if (scale > 1) {
-        // Adjust coordinates for pan offset
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const clickOffsetX = (e.clientX - rect.left) - centerX;
-        const clickOffsetY = (e.clientY - rect.top) - centerY;
-        
-        // Compensate for scale and pan
-        x = ((clickOffsetX - offset.x) / scale + centerX) / rect.width * 100;
-        y = ((clickOffsetY - offset.y) / scale + centerY) / rect.height * 100;
-      }
+      // The visual transform applied by usePinchZoom is a scale(s) followed by a translate(dx, dy)
+      // around a transform-origin managed by that hook.
+      // To approximately invert this transformation for click handling:
+      // 1. getBoundingClientRect() gives us the bounding box AFTER transform
+      // 2. The click position is measured relative to this transformed bounding box
+      // 3. We treat the bounding box center as the reference point that matches how `offset`
+      //    is computed in usePinchZoom, then subtract the translate offset and divide by scale.
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      // Position relative to center of transformed element
+      const relX = clickX - centerX;
+      const relY = clickY - centerY;
+      
+      // getBoundingClientRect() already includes the current translate offset,
+      // so we only need to undo the scaling here.
+      const afterScale = {
+        x: relX / scale,
+        y: relY / scale
+      };
+      
+      // Convert back to absolute position (relative to original unscaled element)
+      const originalWidth = rect.width / scale;
+      const originalHeight = rect.height / scale;
+      const originalX = afterScale.x + originalWidth / 2;
+      const originalY = afterScale.y + originalHeight / 2;
+      
+      // Convert to percentage (0-100)
+      const x = (originalX / originalWidth) * 100;
+      const y = (originalY / originalHeight) * 100;
       
       onShotLocation(
         Math.max(0, Math.min(100, x)),
