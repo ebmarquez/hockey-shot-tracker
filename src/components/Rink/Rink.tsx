@@ -147,13 +147,13 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
       
-      // The transform is: scale(s) translate(dx, dy) with transform-origin at center
-      // To invert this transformation:
-      // 1. The getBoundingClientRect() gives us the bounding box AFTER transform
-      // 2. Click position is relative to this transformed bounding box
-      // 3. To get original coordinates:
-      //    - The center of the transformed element stays at rect.width/2, rect.height/2
-      //    - We need to: subtract translate offset, then divide by scale, accounting for origin
+      // The visual transform applied by usePinchZoom is a scale(s) followed by a translate(dx, dy)
+      // around a transform-origin managed by that hook.
+      // To approximately invert this transformation for click handling:
+      // 1. getBoundingClientRect() gives us the bounding box AFTER transform
+      // 2. The click position is measured relative to this transformed bounding box
+      // 3. We treat the bounding box center as the reference point that matches how `offset`
+      //    is computed in usePinchZoom, then subtract the translate offset and divide by scale.
       
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
