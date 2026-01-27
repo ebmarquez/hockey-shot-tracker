@@ -7,14 +7,17 @@ import * as usePinchZoomModule from '../../hooks/usePinchZoom';
  * Rink Zoom/Pan Coordinate Transformation Tests
  * 
  * This test suite validates shot placement accuracy when the rink is
- * zoomed (scale > 1) and/or panned (offset !== 0).
+ * zoomed (scale > 1).
  * 
  * Tests verify that:
  * 1. Clicks at scale 1x (no zoom) work correctly (baseline)
  * 2. Clicks at scale > 1x (zoomed) are accurately transformed
- * 3. Clicks with pan offset are accurately transformed
- * 4. Combined zoom + pan transformations work correctly
- * 5. Edge cases and boundary clamping work as expected
+ * 3. Pan and pinch gestures prevent shot placement
+ * 4. Edge cases and boundary clamping work as expected
+ * 
+ * Note: Pan offset is managed by touch event handlers and affects the CSS
+ * transform, but getBoundingClientRect() reflects the final transformed state,
+ * so the click coordinate transformation only needs to account for scale.
  */
 
 describe('Rink Zoom/Pan Coordinate Transformations', () => {
@@ -54,7 +57,7 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
     rect: { left: number; top: number; width: number; height: number },
     click: { x: number; y: number }
   ) => {
-    vi.spyOn(element, 'getBoundingClientRect').mockReturnValue({
+    const spy = vi.spyOn(element, 'getBoundingClientRect').mockReturnValueOnce({
       left: rect.left,
       top: rect.top,
       width: rect.width,
@@ -70,6 +73,8 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
       clientX: click.x,
       clientY: click.y,
     });
+
+    spy.mockRestore();
   };
 
   describe('Scale 1x (No Zoom) - Baseline', () => {
@@ -334,7 +339,7 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
   });
 
   describe('Pan Detection - No Shot Placement', () => {
-    it('should not place shot when isPanning is true', () => {
+    it('should not place shot immediately after pan gesture', () => {
       mockUsePinchZoom(2);
       const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
       const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
@@ -366,7 +371,8 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
       });
 
       // The click during pan should be blocked
-      // (though timing may vary due to the 50ms timeout)
+      // (Note: There's a 50ms timeout in the component, so this may be timing-dependent)
+      expect(mockOnShotLocation).not.toHaveBeenCalled();
     });
 
     it('should not place shot when isPinching is true', () => {
@@ -396,14 +402,14 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
   });
 
   describe('Various Zoom Levels', () => {
-    it('should handle zoom levels between 1x and 3x consistently', () => {
-      const zoomLevels = [1, 1.2, 1.5, 2, 2.5, 3];
+    const zoomLevels = [1, 1.2, 1.5, 2, 2.5, 3];
 
-      zoomLevels.forEach((scale) => {
+    zoomLevels.forEach((scale) => {
+      it(`should handle zoom level ${scale}x consistently`, () => {
         mockOnShotLocation.mockClear();
         mockUsePinchZoom(scale);
 
-        const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
+        const { container, unmount } = render(<Rink onShotLocation={mockOnShotLocation} />);
         const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
 
         const scaledWidth = 600 * scale;
@@ -421,6 +427,8 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
           expect.closeTo(50, 0.1),
           expect.closeTo(50, 0.1)
         );
+
+        unmount();
       });
     });
   });
