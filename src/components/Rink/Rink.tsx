@@ -217,19 +217,14 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
         }}
       >
         {/* 
-         * Rink sizing for mobile optimization:
-         * - maxHeight: Uses CSS calc to fill available space
-         * - Reserves space for: header (~40-50px), team cards (~100-150px on mobile), 
-         *   period selector (~50px), zone labels (~40px total), and padding/margins
-         * - minHeight: 500px ensures larger touch targets on small screens
+         * Rink sizing: width-based scaling
+         * - SVG uses w-full to match container width (same as home/away team cards)
+         * - Height auto-scales based on viewBox aspect ratio (85:200)
+         * - This ensures consistent sizing across different devices
          */}
         <svg
           viewBox="0 0 85 200"
           className="w-full h-auto pointer-events-none mx-auto"
-          style={{ 
-            maxHeight: 'calc(100vh - 240px)',
-            minHeight: '500px'
-          }}
         >
           {/* Ice surface with gradient - vertical orientation */}
           <defs>
