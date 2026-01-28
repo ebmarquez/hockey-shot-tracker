@@ -1,4 +1,4 @@
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 
 // Constants for canvas capture configuration
 /** Scale factor for high-DPI output (2x = retina quality) */

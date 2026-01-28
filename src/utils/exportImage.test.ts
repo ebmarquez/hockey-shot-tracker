@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { elementToCanvas, canvasToBlob, exportToPNG } from './exportImage';
 
-// Mock html2canvas
-vi.mock('html2canvas', () => ({
+// Mock html2canvas-pro
+vi.mock('html2canvas-pro', () => ({
   default: vi.fn(),
 }));
 
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 
 describe('Export Image Utilities', () => {
   let mockElement: HTMLElement;
