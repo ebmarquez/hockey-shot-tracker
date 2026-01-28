@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
 import type { Game } from '../types';
+import { elementToCanvas } from './exportImage';
 
 /**
  * Export game data as PDF report
@@ -22,12 +22,8 @@ export const exportToPDF = async (
     pdf.text(`${game.homeTeam} vs ${game.awayTeam}`, pageWidth / 2, 22, { align: 'center' });
     pdf.text(new Date(game.date).toLocaleDateString(), pageWidth / 2, 28, { align: 'center' });
 
-    // Capture shot chart
-    const canvas = await html2canvas(chartElement, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      logging: false,
-    });
+    // Capture shot chart using the shared utility that handles oklch colors
+    const canvas = await elementToCanvas(chartElement);
 
     const imgData = canvas.toDataURL('image/png');
     const imgWidth = pageWidth - 20;
@@ -99,7 +95,7 @@ export const exportToPDF = async (
         }
 
         const periodLabel = shot.period === 'OT' ? 'OT' : `P${shot.period}`;
-        const text = `${index + 1}. ${periodLabel} ${shot.team.toUpperCase()} - ${shot.shotType} - ${shot.result}`;
+        const text = `${index + 1}. ${periodLabel} ${shot.team.toUpperCase()} - ${shot.result}`;
         pdf.text(text, 15, yPos);
         yPos += 5;
       });
