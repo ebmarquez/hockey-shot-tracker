@@ -218,8 +218,11 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
       >
         <svg
           viewBox="0 0 85 200"
-          className="w-full h-auto pointer-events-none"
-          style={{ maxHeight: '70vh' }}
+          className="w-full h-auto pointer-events-none mx-auto"
+          style={{ 
+            maxHeight: 'calc(100vh - 350px)',
+            minHeight: '300px'
+          }}
         >
           {/* Ice surface with gradient - vertical orientation */}
           <defs>
