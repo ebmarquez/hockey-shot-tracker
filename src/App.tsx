@@ -283,7 +283,7 @@ const GameView: React.FC = () => {
                   <div className="text-[10px] sm:text-xs text-gray-500">Goals</div>
                 </div>
                 <div className="hidden sm:block">
-                  <div className="text-3xl sm:text-4xl font-bold text-red-400 tabular-nums">{homePeriodShootingPct.toFixed(1)}%</div>
+                  <div className="text-4xl font-bold text-red-400 tabular-nums">{homePeriodShootingPct.toFixed(1)}%</div>
                   <div className="text-xs text-gray-500">Sh%</div>
                 </div>
               </div>
@@ -359,7 +359,7 @@ const GameView: React.FC = () => {
                   <div className="text-[10px] sm:text-xs text-gray-500">Goals</div>
                 </div>
                 <div className="hidden sm:block">
-                  <div className="text-3xl sm:text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShootingPct.toFixed(1)}%</div>
+                  <div className="text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShootingPct.toFixed(1)}%</div>
                   <div className="text-xs text-gray-500">Sh%</div>
                 </div>
               </div>
@@ -413,7 +413,7 @@ const GameView: React.FC = () => {
                 <button
                   key={period}
                   onClick={() => handlePeriodChange(period)}
-                  className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm min-w-[44px] sm:min-w-[60px] transition-colors border
+                  className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm min-w-[44px] sm:min-w-[60px] min-h-[36px] sm:min-h-[44px] transition-colors border
                     ${state.game!.currentPeriod === period
                       ? 'bg-blue-600 text-white border-blue-600'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 active:bg-gray-100'

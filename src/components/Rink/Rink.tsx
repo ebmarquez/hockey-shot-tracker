@@ -219,7 +219,8 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
         {/* 
          * Rink sizing for mobile optimization:
          * - maxHeight: Uses CSS calc to fill available space
-         * - On mobile: 100vh minus header (~60px), period selector (~80px), and bottom controls (~100px)
+         * - Reserves space for: header (~40-50px), team cards (~100-150px on mobile), 
+         *   period selector (~50px), zone labels (~40px total), and padding/margins
          * - minHeight: 400px ensures usable touch targets on small screens
          */}
         <svg
