@@ -307,6 +307,38 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
       expect(mockOnShotLocation).not.toHaveBeenCalled();
     });
 
+    it('should accept clicks within the center of the rink', () => {
+      mockUsePinchZoom(1);
+      const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
+      const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
+
+      // Click at the center of the rink - should always be accepted
+      simulateClick(
+        rinkElement,
+        { left: 100, top: 100, width: 600, height: 300 },
+        { x: 400, y: 250 }  // center of element
+      );
+
+      expect(mockOnShotLocation).toHaveBeenCalled();
+    });
+
+    it('should accept clicks along the middle edges (not in corners)', () => {
+      mockUsePinchZoom(1);
+      const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
+      const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
+
+      // Click along the left edge at the middle (not in corner area)
+      // Element is 600x300, left edge is at x=100, so x=130 is ~5% from left
+      // Middle vertically is y=250, which should be well within the rink
+      simulateClick(
+        rinkElement,
+        { left: 100, top: 100, width: 600, height: 300 },
+        { x: 130, y: 250 }  // near left edge, middle vertically
+      );
+
+      expect(mockOnShotLocation).toHaveBeenCalled();
+    });
+
     it('should handle fractional scale values correctly', () => {
       mockUsePinchZoom(1.5);
       const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);

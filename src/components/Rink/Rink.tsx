@@ -139,73 +139,84 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
    * The rink has rounded corners with a 28 ft radius on a 85x200 ft surface.
    * This function checks if the point is inside the rounded rectangle shape.
    * 
-   * @param xPercent - X position as percentage (0-100)
-   * @param yPercent - Y position as percentage (0-100)
+   * Coordinate mapping (vertical rink display):
+   * - screenXPercent (horizontal on screen) -> rinkY (width, 0-85 ft)
+   * - screenYPercent (vertical on screen) -> rinkX (length, 0-200 ft)
+   * 
+   * @param screenXPercent - Horizontal screen position as percentage (0-100)
+   * @param screenYPercent - Vertical screen position as percentage (0-100)
    * @returns true if point is within the rink boundary
    */
-  const isWithinRinkBoundary = (xPercent: number, yPercent: number): boolean => {
-    // Convert percentage to rink coordinates (85 wide x 200 tall)
-    // Note: In the vertical rink display:
-    // - screenX (horizontal) maps to rink width (0-85)
-    // - screenY (vertical) maps to rink height (0-200)
-    const rinkWidth = 85;
-    const rinkHeight = 200;
+  const isWithinRinkBoundary = (screenXPercent: number, screenYPercent: number): boolean => {
+    // NHL rink dimensions
+    const rinkWidth = 85;  // feet (displayed as screen width)
+    const rinkHeight = 200; // feet (displayed as screen height)
     const cornerRadius = 28; // NHL corner radius in feet
     
-    // Convert percentage to actual rink coordinates
-    // xPercent is screen horizontal position -> rink Y (width)
-    // yPercent is screen vertical position -> rink X (height)
-    const rinkY = (xPercent / 100) * rinkWidth;  // 0-85
-    const rinkX = (yPercent / 100) * rinkHeight; // 0-200
+    // Small margin inside the boards to prevent shots on the very edge
+    // This accounts for the board width and provides a small buffer
+    const boardMargin = 2; // feet
     
-    // Add a small margin inside the boards (2 ft / ~2.4% of width, ~1% of height)
-    const margin = 2;
+    // Convert screen percentages to rink coordinates (feet)
+    // Screen horizontal (X) maps to rink width (Y in rink coordinates)
+    // Screen vertical (Y) maps to rink length (X in rink coordinates)
+    const rinkY = (screenXPercent / 100) * rinkWidth;  // 0-85 ft
+    const rinkX = (screenYPercent / 100) * rinkHeight; // 0-200 ft
     
-    // Check if point is in the main rectangular area (excluding corners)
+    // First, check if point is within the overall rectangular bounds (with margin)
     const inMainRect = 
-      rinkY >= margin && rinkY <= (rinkWidth - margin) &&
-      rinkX >= margin && rinkX <= (rinkHeight - margin);
+      rinkY >= boardMargin && rinkY <= (rinkWidth - boardMargin) &&
+      rinkX >= boardMargin && rinkX <= (rinkHeight - boardMargin);
     
     if (!inMainRect) {
       return false;
     }
     
-    // Check corner regions - if we're in a corner zone, verify we're inside the rounded corner
-    const cornerZoneSize = cornerRadius + margin;
+    // Now check if we're in a corner region that needs special handling
+    // The corner circles are centered at (cornerRadius, cornerRadius) from each corner
+    // Points in the corner "square" area but outside the quarter-circle are outside the rink
     
-    // Top-left corner (rinkX < cornerRadius, rinkY < cornerRadius)
-    if (rinkX < cornerZoneSize && rinkY < cornerZoneSize) {
-      const dx = cornerZoneSize - rinkX;
-      const dy = cornerZoneSize - rinkY;
-      const effectiveRadius = cornerRadius - margin;
+    // Corner center positions (from rink edges)
+    const cornerCenterDist = cornerRadius; // Distance from edge to corner circle center
+    
+    // Top-left corner check (rinkX < cornerRadius, rinkY < cornerRadius)
+    if (rinkX < cornerCenterDist && rinkY < cornerCenterDist) {
+      // Distance from the corner circle center at (cornerRadius, cornerRadius)
+      const dx = cornerCenterDist - rinkX;
+      const dy = cornerCenterDist - rinkY;
+      // Point must be within (cornerRadius - boardMargin) of the center
+      const effectiveRadius = cornerRadius - boardMargin;
       return (dx * dx + dy * dy) <= (effectiveRadius * effectiveRadius);
     }
     
-    // Top-right corner (rinkX < cornerRadius, rinkY > width - cornerRadius)
-    if (rinkX < cornerZoneSize && rinkY > (rinkWidth - cornerZoneSize)) {
-      const dx = cornerZoneSize - rinkX;
-      const dy = rinkY - (rinkWidth - cornerZoneSize);
-      const effectiveRadius = cornerRadius - margin;
+    // Top-right corner check (rinkX < cornerRadius, rinkY > width - cornerRadius)
+    if (rinkX < cornerCenterDist && rinkY > (rinkWidth - cornerCenterDist)) {
+      // Distance from the corner circle center at (cornerRadius, rinkWidth - cornerRadius)
+      const dx = cornerCenterDist - rinkX;
+      const dy = rinkY - (rinkWidth - cornerCenterDist);
+      const effectiveRadius = cornerRadius - boardMargin;
       return (dx * dx + dy * dy) <= (effectiveRadius * effectiveRadius);
     }
     
-    // Bottom-left corner (rinkX > height - cornerRadius, rinkY < cornerRadius)
-    if (rinkX > (rinkHeight - cornerZoneSize) && rinkY < cornerZoneSize) {
-      const dx = rinkX - (rinkHeight - cornerZoneSize);
-      const dy = cornerZoneSize - rinkY;
-      const effectiveRadius = cornerRadius - margin;
+    // Bottom-left corner check (rinkX > height - cornerRadius, rinkY < cornerRadius)
+    if (rinkX > (rinkHeight - cornerCenterDist) && rinkY < cornerCenterDist) {
+      // Distance from the corner circle center at (rinkHeight - cornerRadius, cornerRadius)
+      const dx = rinkX - (rinkHeight - cornerCenterDist);
+      const dy = cornerCenterDist - rinkY;
+      const effectiveRadius = cornerRadius - boardMargin;
       return (dx * dx + dy * dy) <= (effectiveRadius * effectiveRadius);
     }
     
-    // Bottom-right corner (rinkX > height - cornerRadius, rinkY > width - cornerRadius)
-    if (rinkX > (rinkHeight - cornerZoneSize) && rinkY > (rinkWidth - cornerZoneSize)) {
-      const dx = rinkX - (rinkHeight - cornerZoneSize);
-      const dy = rinkY - (rinkWidth - cornerZoneSize);
-      const effectiveRadius = cornerRadius - margin;
+    // Bottom-right corner check (rinkX > height - cornerRadius, rinkY > width - cornerRadius)
+    if (rinkX > (rinkHeight - cornerCenterDist) && rinkY > (rinkWidth - cornerCenterDist)) {
+      // Distance from the corner circle center at (rinkHeight - cornerRadius, rinkWidth - cornerRadius)
+      const dx = rinkX - (rinkHeight - cornerCenterDist);
+      const dy = rinkY - (rinkWidth - cornerCenterDist);
+      const effectiveRadius = cornerRadius - boardMargin;
       return (dx * dx + dy * dy) <= (effectiveRadius * effectiveRadius);
     }
     
-    // Point is in main area, not in a corner zone
+    // Point is in main rectangular area, not in a corner region
     return true;
   };
 
