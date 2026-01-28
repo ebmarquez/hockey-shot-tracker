@@ -55,7 +55,7 @@ const Statistics: React.FC<StatisticsProps> = ({ game }) => {
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
           <h3 className="font-bold text-white text-sm uppercase tracking-wide">{game.homeTeam}</h3>
         </div>
-        <div className="grid grid-cols-4 gap-3 text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
           <div>
             <div className="text-2xl font-bold text-emerald-400 tabular-nums">{homeStats.totalShots}</div>
             <div className="text-xs text-slate-400">Shots</div>
@@ -93,7 +93,7 @@ const Statistics: React.FC<StatisticsProps> = ({ game }) => {
           <div className="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-lg shadow-orange-400/50" />
           <h3 className="font-bold text-white text-sm uppercase tracking-wide">{game.awayTeam}</h3>
         </div>
-        <div className="grid grid-cols-4 gap-3 text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
           <div>
             <div className="text-2xl font-bold text-orange-400 tabular-nums">{awayStats.totalShots}</div>
             <div className="text-xs text-slate-400">Shots</div>

@@ -241,7 +241,7 @@ const GameView: React.FC = () => {
 
       <main className="max-w-2xl mx-auto px-4 py-4">
         {/* Team Cards */}
-        <div className="flex gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
           {/* Home Team Card */}
           <div className={`flex-1 rounded-xl p-4 transition-all ${
             state.selectedTeam === 'home' ? 'bg-red-100 ring-2 ring-red-400' : 'bg-red-50'
@@ -269,32 +269,32 @@ const GameView: React.FC = () => {
             
             <div className="mt-4">
               <div className="text-xs text-gray-500 mb-2">Current Period</div>
-              <div className="flex gap-8">
+              <div className="flex gap-3 sm:gap-8">
                 <div>
-                  <div className="text-4xl font-bold text-red-400 tabular-nums">{homePeriodShots.length}</div>
+                  <div className="text-3xl sm:text-4xl font-bold text-red-400 tabular-nums">{homePeriodShots.length}</div>
                   <div className="text-xs text-gray-500">Shots</div>
                 </div>
                 <div>
-                  <div className="text-4xl font-bold text-red-400 tabular-nums">{homePeriodGoals}</div>
+                  <div className="text-3xl sm:text-4xl font-bold text-red-400 tabular-nums">{homePeriodGoals}</div>
                   <div className="text-xs text-gray-500">Goals</div>
                 </div>
                 <div>
-                  <div className="text-4xl font-bold text-red-400 tabular-nums">{homePeriodShootingPct.toFixed(1)}%</div>
+                  <div className="text-3xl sm:text-4xl font-bold text-red-400 tabular-nums">{homePeriodShootingPct.toFixed(1)}%</div>
                   <div className="text-xs text-gray-500">Sh%</div>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-4 pt-3 border-t border-red-200">
-              <span className="text-xs text-gray-500">Game Total</span>
-              <div className="flex gap-2">
-                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200">
+            <div className="mt-4 pt-3 border-t border-red-200">
+              <span className="text-xs text-gray-500 block mb-2">Game Total</span>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 flex-shrink-0">
                   {homeShots.length} S
                 </span>
-                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200">
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 flex-shrink-0">
                   {homeGoals} G
                 </span>
-                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 tabular-nums">
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 tabular-nums flex-shrink-0">
                   {homeShootingPct.toFixed(1)}%
                 </span>
               </div>
@@ -343,32 +343,32 @@ const GameView: React.FC = () => {
             
             <div className="mt-4">
               <div className="text-xs text-gray-500 mb-2">Current Period</div>
-              <div className="flex gap-8">
+              <div className="flex gap-3 sm:gap-8">
                 <div>
-                  <div className="text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShots.length}</div>
+                  <div className="text-3xl sm:text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShots.length}</div>
                   <div className="text-xs text-gray-500">Shots</div>
                 </div>
                 <div>
-                  <div className="text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodGoals}</div>
+                  <div className="text-3xl sm:text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodGoals}</div>
                   <div className="text-xs text-gray-500">Goals</div>
                 </div>
                 <div>
-                  <div className="text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShootingPct.toFixed(1)}%</div>
+                  <div className="text-3xl sm:text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShootingPct.toFixed(1)}%</div>
                   <div className="text-xs text-gray-500">Sh%</div>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-4 pt-3 border-t border-red-200">
-              <span className="text-xs text-gray-500">Game Total</span>
-              <div className="flex gap-2">
-                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200">
+            <div className="mt-4 pt-3 border-t border-red-200">
+              <span className="text-xs text-gray-500 block mb-2">Game Total</span>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 flex-shrink-0">
                   {awayShots.length} S
                 </span>
-                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200">
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 flex-shrink-0">
                   {awayGoals} G
                 </span>
-                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 tabular-nums">
+                <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 tabular-nums flex-shrink-0">
                   {awayShootingPct.toFixed(1)}%
                 </span>
               </div>
