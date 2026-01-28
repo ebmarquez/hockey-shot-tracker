@@ -36,7 +36,7 @@ const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick, isDeletable = fa
           onClick?.(shot);
         }
       }}
-      title={isDeletable ? `Click to delete: ${shot.team} - ${shot.result} (${shot.shotType})` : `${shot.team} - ${shot.result} (${shot.shotType})`}
+      title={isDeletable ? `Click to delete: ${shot.team} - ${shot.result}` : `${shot.team} - ${shot.result}`}
     >
       <div className="flex items-center justify-center w-full h-full">
         <svg width="24" height="24" viewBox="0 0 24 24">
