@@ -62,8 +62,13 @@ describe('Rink Pan Gestures', () => {
         toJSON: () => ({})
       });
       
-      // Simulate click at center
-      rinkElement.click();
+      // Simulate click at center of the rink (within boundary)
+      const clickEvent = new MouseEvent('click', {
+        bubbles: true,
+        clientX: 300,  // center X
+        clientY: 127.5 // center Y
+      });
+      rinkElement.dispatchEvent(clickEvent);
       
       expect(mockOnShotLocation).toHaveBeenCalled();
     });
