@@ -216,6 +216,11 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
           touchAction: scale > 1 ? 'none' : 'auto'
         }}
       >
+        {/* 
+         * Rink sizing:
+         * - maxHeight: 100vh minus ~350px for header, team cards, period selector, and controls
+         * - minHeight: 300px ensures accurate shot placement on small screens
+         */}
         <svg
           viewBox="0 0 85 200"
           className="w-full h-auto pointer-events-none mx-auto"
