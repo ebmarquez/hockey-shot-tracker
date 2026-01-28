@@ -8,21 +8,21 @@ import Rink from './Rink';
  * This test suite validates the zone labels feature of the Rink component,
  * ensuring that labels display correctly with default and custom team names.
  * 
- * NHL Convention:
- * - Away team zone displayed on LEFT side
- * - Home team zone displayed on RIGHT side (home attacks right)
+ * NHL Convention (Vertical Rink Orientation):
+ * - Away team zone displayed at TOP of rink
+ * - Home team zone displayed at BOTTOM of rink (home attacks bottom)
  */
 
 describe('Zone Labels', () => {
   const mockOnShotLocation = vi.fn();
 
-  it('should display Home Zone on right side', () => {
+  it('should display Home Zone at bottom', () => {
     render(<Rink onShotLocation={mockOnShotLocation} />);
     
     expect(screen.getByText('Home Zone')).toBeInTheDocument();
   });
 
-  it('should display Away Zone on left side', () => {
+  it('should display Away Zone at top', () => {
     render(<Rink onShotLocation={mockOnShotLocation} />);
     
     expect(screen.getByText('Away Zone')).toBeInTheDocument();
