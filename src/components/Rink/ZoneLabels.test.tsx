@@ -97,9 +97,9 @@ describe('Zone Labels', () => {
     const awayLabel = screen.getByText('Away Zone');
     const homeLabel = screen.getByText('Home Zone');
     
-    // Check for gray text and small font size classes
-    expect(awayLabel).toHaveClass('text-gray-400', 'text-sm');
-    expect(homeLabel).toHaveClass('text-gray-400', 'text-sm');
+    // Check for gray text and responsive font size classes (text-xs on mobile, sm:text-sm on larger screens)
+    expect(awayLabel).toHaveClass('text-gray-400', 'text-xs', 'sm:text-sm');
+    expect(homeLabel).toHaveClass('text-gray-400', 'text-xs', 'sm:text-sm');
   });
 
   it('should fall back to default labels when team names are empty strings', () => {

@@ -206,47 +206,50 @@ const GameView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
+      {/* Header - Compact on mobile */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
-        <div className="max-w-2xl mx-auto flex items-center justify-center gap-3 px-4 py-3">
+        <div className="max-w-2xl mx-auto flex items-center justify-center gap-1 sm:gap-3 px-1 sm:px-4 py-1.5 sm:py-3">
           <button
             onClick={() => setShowSummary(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500 bg-blue-50 text-blue-700 font-medium text-sm hover:bg-blue-100 active:bg-blue-200 min-h-[44px]"
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-blue-500 bg-blue-50 text-blue-700 font-medium text-xs sm:text-sm hover:bg-blue-100 active:bg-blue-200 min-h-[36px] sm:min-h-[44px]"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-3 h-3 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
             </svg>
-            Summary
+            <span className="hidden sm:inline">Summary</span>
+            <span className="sm:hidden">Stats</span>
           </button>
           <button
             onClick={handleEndGame}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 active:bg-gray-100"
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium text-xs sm:text-sm hover:bg-gray-50 active:bg-gray-100 min-h-[36px] sm:min-h-[44px]"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-3 h-3 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/>
             </svg>
-            End Game
+            <span className="hidden sm:inline">End Game</span>
+            <span className="sm:hidden">End</span>
           </button>
           <button
             onClick={handleResetGame}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 active:bg-gray-100"
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium text-xs sm:text-sm hover:bg-gray-50 active:bg-gray-100 min-h-[36px] sm:min-h-[44px]"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-3 h-3 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
             </svg>
-            Reset Game
+            <span className="hidden sm:inline">Reset Game</span>
+            <span className="sm:hidden">Reset</span>
           </button>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-4">
-        {/* Team Cards */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+      <main className="max-w-2xl mx-auto px-1 sm:px-4 py-2 sm:py-4">
+        {/* Team Cards - Compact horizontal layout on mobile to maximize rink space */}
+        <div className="flex flex-row gap-2 sm:gap-4 mb-2 sm:mb-4">
           {/* Home Team Card */}
-          <div className={`flex-1 rounded-xl p-4 transition-all ${
+          <div className={`flex-1 rounded-lg sm:rounded-xl p-2 sm:p-4 transition-all ${
             state.selectedTeam === 'home' ? 'bg-red-100 ring-2 ring-red-400' : 'bg-red-50'
           }`}>
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">HOME</div>
+            <div className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wide">HOME</div>
             {editingTeam === 'home' ? (
               <input
                 type="text"
@@ -255,37 +258,39 @@ const GameView: React.FC = () => {
                 onBlur={handleSaveTeamName}
                 onKeyDown={handleKeyDown}
                 autoFocus
-                className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b-2 border-blue-500 bg-transparent w-full focus:outline-none"
+                className="text-sm sm:text-base font-semibold text-gray-900 mt-0.5 sm:mt-1 pb-1 sm:pb-2 border-b-2 border-blue-500 bg-transparent w-full focus:outline-none"
                 onFocus={(e) => e.target.select()}
               />
             ) : (
               <div 
                 onClick={() => handleEditTeamName('home')}
-                className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b border-gray-300 cursor-pointer hover:border-blue-500 transition-colors min-h-[44px] flex items-center"
+                className="text-sm sm:text-base font-semibold text-gray-900 mt-0.5 sm:mt-1 pb-1 sm:pb-2 border-b border-gray-300 cursor-pointer hover:border-blue-500 transition-colors min-h-[36px] sm:min-h-[44px] flex items-center truncate"
               >
                 {state.game.homeTeam}
               </div>
             )}
             
-            <div className="mt-4">
-              <div className="text-xs text-gray-500 mb-2">Current Period</div>
-              <div className="flex gap-3 sm:gap-8">
+            {/* Compact stats on mobile */}
+            <div className="mt-2 sm:mt-4">
+              <div className="text-[10px] sm:text-xs text-gray-500 mb-1 sm:mb-2">Current Period</div>
+              <div className="flex gap-2 sm:gap-8">
                 <div>
-                  <div className="text-3xl sm:text-4xl font-bold text-red-400 tabular-nums">{homePeriodShots.length}</div>
-                  <div className="text-xs text-gray-500">Shots</div>
+                  <div className="text-xl sm:text-4xl font-bold text-red-400 tabular-nums">{homePeriodShots.length}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500">Shots</div>
                 </div>
                 <div>
-                  <div className="text-3xl sm:text-4xl font-bold text-red-400 tabular-nums">{homePeriodGoals}</div>
-                  <div className="text-xs text-gray-500">Goals</div>
+                  <div className="text-xl sm:text-4xl font-bold text-red-400 tabular-nums">{homePeriodGoals}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500">Goals</div>
                 </div>
-                <div>
-                  <div className="text-3xl sm:text-4xl font-bold text-red-400 tabular-nums">{homePeriodShootingPct.toFixed(1)}%</div>
+                <div className="hidden sm:block">
+                  <div className="text-4xl font-bold text-red-400 tabular-nums">{homePeriodShootingPct.toFixed(1)}%</div>
                   <div className="text-xs text-gray-500">Sh%</div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-red-200">
+            {/* Game Total - Hidden on mobile to save space */}
+            <div className="hidden sm:block mt-4 pt-3 border-t border-red-200">
               <span className="text-xs text-gray-500 block mb-2">Game Total</span>
               <div className="flex flex-wrap gap-2">
                 <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 flex-shrink-0">
@@ -300,9 +305,9 @@ const GameView: React.FC = () => {
               </div>
             </div>
 
-            {/* Per-Period Breakdown */}
+            {/* Per-Period Breakdown - Hidden on mobile */}
             {homePerPeriodStats.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-red-200">
+              <div className="hidden sm:block mt-3 pt-3 border-t border-red-200">
                 <div className="text-xs text-gray-500 mb-2">By Period</div>
                 <div className="space-y-1">
                   {homePerPeriodStats.map(stats => (
@@ -317,10 +322,10 @@ const GameView: React.FC = () => {
           </div>
 
           {/* Away Team Card */}
-          <div className={`flex-1 rounded-xl p-4 transition-all ${
+          <div className={`flex-1 rounded-lg sm:rounded-xl p-2 sm:p-4 transition-all ${
             state.selectedTeam === 'away' ? 'bg-red-100 ring-2 ring-blue-400' : 'bg-red-50'
           }`}>
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">AWAY</div>
+            <div className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wide">AWAY</div>
             {editingTeam === 'away' ? (
               <input
                 type="text"
@@ -329,37 +334,39 @@ const GameView: React.FC = () => {
                 onBlur={handleSaveTeamName}
                 onKeyDown={handleKeyDown}
                 autoFocus
-                className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b-2 border-blue-500 bg-transparent w-full focus:outline-none"
+                className="text-sm sm:text-base font-semibold text-gray-900 mt-0.5 sm:mt-1 pb-1 sm:pb-2 border-b-2 border-blue-500 bg-transparent w-full focus:outline-none"
                 onFocus={(e) => e.target.select()}
               />
             ) : (
               <div 
                 onClick={() => handleEditTeamName('away')}
-                className="text-base font-semibold text-gray-900 mt-1 pb-2 border-b border-gray-300 cursor-pointer hover:border-blue-500 transition-colors min-h-[44px] flex items-center"
+                className="text-sm sm:text-base font-semibold text-gray-900 mt-0.5 sm:mt-1 pb-1 sm:pb-2 border-b border-gray-300 cursor-pointer hover:border-blue-500 transition-colors min-h-[36px] sm:min-h-[44px] flex items-center truncate"
               >
                 {state.game.awayTeam}
               </div>
             )}
             
-            <div className="mt-4">
-              <div className="text-xs text-gray-500 mb-2">Current Period</div>
-              <div className="flex gap-3 sm:gap-8">
+            {/* Compact stats on mobile */}
+            <div className="mt-2 sm:mt-4">
+              <div className="text-[10px] sm:text-xs text-gray-500 mb-1 sm:mb-2">Current Period</div>
+              <div className="flex gap-2 sm:gap-8">
                 <div>
-                  <div className="text-3xl sm:text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShots.length}</div>
-                  <div className="text-xs text-gray-500">Shots</div>
+                  <div className="text-xl sm:text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShots.length}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500">Shots</div>
                 </div>
                 <div>
-                  <div className="text-3xl sm:text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodGoals}</div>
-                  <div className="text-xs text-gray-500">Goals</div>
+                  <div className="text-xl sm:text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodGoals}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500">Goals</div>
                 </div>
-                <div>
-                  <div className="text-3xl sm:text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShootingPct.toFixed(1)}%</div>
+                <div className="hidden sm:block">
+                  <div className="text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShootingPct.toFixed(1)}%</div>
                   <div className="text-xs text-gray-500">Sh%</div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-red-200">
+            {/* Game Total - Hidden on mobile to save space */}
+            <div className="hidden sm:block mt-4 pt-3 border-t border-red-200">
               <span className="text-xs text-gray-500 block mb-2">Game Total</span>
               <div className="flex flex-wrap gap-2">
                 <span className="px-2 py-1 bg-white rounded text-sm font-semibold text-gray-700 border border-gray-200 flex-shrink-0">
@@ -374,9 +381,9 @@ const GameView: React.FC = () => {
               </div>
             </div>
 
-            {/* Per-Period Breakdown */}
+            {/* Per-Period Breakdown - Hidden on mobile */}
             {awayPerPeriodStats.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-red-200">
+              <div className="hidden sm:block mt-3 pt-3 border-t border-red-200">
                 <div className="text-xs text-gray-500 mb-2">By Period</div>
                 <div className="space-y-1">
                   {awayPerPeriodStats.map(stats => (
@@ -391,22 +398,22 @@ const GameView: React.FC = () => {
           </div>
         </div>
 
-        {/* Rink Card */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-          {/* Period Selector */}
-          <div className="p-4 border-b border-gray-100">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+        {/* Rink Card - Full width on mobile for easier shot placement */}
+        <div className="bg-white sm:rounded-xl shadow-sm overflow-hidden sm:border border-gray-200 -mx-1 sm:mx-0">
+          {/* Period Selector - Compact on mobile */}
+          <div className="p-2 sm:p-4 border-b border-gray-100">
+            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1 sm:mb-3">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
               </svg>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Period</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wide">Period</span>
             </div>
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-center gap-1 sm:gap-2">
               {periods.map((period) => (
                 <button
                   key={period}
                   onClick={() => handlePeriodChange(period)}
-                  className={`px-5 py-2 rounded-lg font-semibold text-sm min-w-[60px] transition-colors border
+                  className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm min-w-[44px] sm:min-w-[60px] min-h-[36px] sm:min-h-[44px] transition-colors border
                     ${state.game!.currentPeriod === period
                       ? 'bg-blue-600 text-white border-blue-600'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 active:bg-gray-100'
@@ -418,8 +425,8 @@ const GameView: React.FC = () => {
             </div>
           </div>
           
-          {/* Rink */}
-          <div className="p-2">
+          {/* Rink - minimal padding on mobile for maximum rink size */}
+          <div className="p-0 sm:p-2">
             <Rink 
               onShotLocation={handleShotLocation}
               homeTeamName={state.game.homeTeam}

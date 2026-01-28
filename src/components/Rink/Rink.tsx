@@ -195,9 +195,9 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
 
   return (
     <div className="relative w-full overflow-hidden">
-      {/* Zone Label - Top (Away Zone) */}
-      <div className="flex justify-center px-2 mb-1">
-        <span className="text-gray-400 text-sm">
+      {/* Zone Label - Top (Away Zone) - smaller on mobile */}
+      <div className="flex justify-center px-1 sm:px-2 mb-0.5 sm:mb-1">
+        <span className="text-gray-400 text-xs sm:text-sm">
           {awayTeamName ? `${awayTeamName} Zone` : 'Away Zone'}
         </span>
       </div>
@@ -217,17 +217,14 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
         }}
       >
         {/* 
-         * Rink sizing:
-         * - maxHeight: 100vh minus ~350px for header, team cards, period selector, and controls
-         * - minHeight: 300px ensures accurate shot placement on small screens
+         * Rink sizing: width-based scaling
+         * - SVG uses w-full to match container width (same as home/away team cards)
+         * - Height auto-scales based on viewBox aspect ratio (85:200)
+         * - This ensures consistent sizing across different devices
          */}
         <svg
           viewBox="0 0 85 200"
           className="w-full h-auto pointer-events-none mx-auto"
-          style={{ 
-            maxHeight: 'calc(100vh - 350px)',
-            minHeight: '300px'
-          }}
         >
           {/* Ice surface with gradient - vertical orientation */}
           <defs>
@@ -356,9 +353,9 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
         </div>
       </div>
       
-      {/* Zone Label - Bottom (Home Zone) */}
-      <div className="flex justify-center px-2 mt-1">
-        <span className="text-gray-400 text-sm">
+      {/* Zone Label - Bottom (Home Zone) - smaller on mobile */}
+      <div className="flex justify-center px-1 sm:px-2 mt-0.5 sm:mt-1">
+        <span className="text-gray-400 text-xs sm:text-sm">
           {homeTeamName ? `${homeTeamName} Zone` : 'Home Zone'}
         </span>
       </div>
