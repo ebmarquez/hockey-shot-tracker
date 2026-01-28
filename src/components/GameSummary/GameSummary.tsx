@@ -15,8 +15,9 @@ interface GameSummaryProps {
 /**
  * ShotMarkerSummary - A shot marker for summary view that correctly maps coordinates
  * Uses the same vertical rink coordinate system as the main Rink component
+ * Adjusted for half-rink display (home shows bottom half, away shows top half)
  */
-const ShotMarkerSummary: React.FC<{ shot: Shot }> = ({ shot }) => {
+const ShotMarkerSummary: React.FC<{ shot: Shot; isHalfRink: boolean }> = ({ shot, isHalfRink }) => {
   const isGoal = shot.result === 'goal';
   const isHome = shot.team === 'home';
 
@@ -29,7 +30,20 @@ const ShotMarkerSummary: React.FC<{ shot: Shot }> = ({ shot }) => {
   // Rink X (0-100, left to right) -> Screen Y (0-100, top to bottom)
   // Rink Y (0-100, top to bottom) -> Screen X (0-100, left to right)
   const screenLeft = shot.y;  // Rink Y becomes screen X
-  const screenTop = shot.x;   // Rink X becomes screen Y
+  
+  // For half-rink display, we need to remap the Y coordinate
+  // Home team: shots are in bottom half (x > 50), remap 50-100 to 0-100
+  // Away team: shots are in top half (x < 50), remap 0-50 to 0-100
+  let screenTop = shot.x;
+  if (isHalfRink) {
+    if (isHome) {
+      // Home shots: x ranges from 50-100, remap to 0-100
+      screenTop = (shot.x - 50) * 2;
+    } else {
+      // Away shots: x ranges from 0-50, remap to 0-100
+      screenTop = shot.x * 2;
+    }
+  }
 
   return (
     <div
@@ -68,14 +82,21 @@ const ShotMarkerSummary: React.FC<{ shot: Shot }> = ({ shot }) => {
 };
 
 /**
- * TeamShotMap component - A vertical rink showing shots for a specific team
- * Uses the same vertical orientation as the main Rink for correct shot alignment
+ * TeamShotMap component - A half-rink showing shots for a specific team
+ * Shows only the relevant half of the rink:
+ * - Home team: bottom half (attacking zone where home shots are recorded)
+ * - Away team: top half (attacking zone where away shots are recorded)
  */
 const TeamShotMap: React.FC<{ shots: Shot[]; team: Team; teamName: string }> = ({ shots, team, teamName }) => {
   const teamShots = shots.filter(shot => shot.team === team);
   const goals = teamShots.filter(s => s.result === 'goal').length;
   const isHome = team === 'home';
   const uniqueId = `team-${team}`;
+
+  // viewBox for half rink:
+  // Home team (bottom half): y from 100 to 200 in full rink coordinates
+  // Away team (top half): y from 0 to 100 in full rink coordinates
+  const viewBox = isHome ? "0 100 85 100" : "0 0 85 100";
 
   return (
     <div className="flex flex-col items-center">
@@ -84,11 +105,12 @@ const TeamShotMap: React.FC<{ shots: Shot[]; team: Team; teamName: string }> = (
         {teamName}
       </div>
       
-      {/* Vertical Rink */}
-      <div className="relative w-full max-w-[120px]">
+      {/* Half Rink */}
+      <div className="relative w-full max-w-[140px]">
         <svg
-          viewBox="0 0 85 200"
+          viewBox={viewBox}
           className="w-full h-auto"
+          preserveAspectRatio="xMidYMid meet"
         >
           {/* Ice surface with gradient - vertical orientation */}
           <defs>
@@ -99,10 +121,10 @@ const TeamShotMap: React.FC<{ shots: Shot[]; team: Team; teamName: string }> = (
             </linearGradient>
           </defs>
           
-          {/* Ice surface - vertical */}
+          {/* Ice surface - full rink (we'll clip via viewBox) */}
           <rect x="0" y="0" width="85" height="200" fill={`url(#ice-gradient-${uniqueId})`} />
           
-          {/* Boards (outer boundary) - vertical */}
+          {/* Boards (outer boundary) */}
           <rect x="0" y="0" width="85" height="200" fill="none" stroke="#1e3a8a" strokeWidth="1.2" rx="4" />
           
           {/* Center red line - horizontal in vertical rink */}
@@ -120,15 +142,15 @@ const TeamShotMap: React.FC<{ shots: Shot[]; team: Team; teamName: string }> = (
           <circle cx="42.5" cy="100" r="15" fill="none" stroke="#2563eb" strokeWidth="1" />
           <circle cx="42.5" cy="100" r="1" fill="#2563eb" />
           
-          {/* Top zone faceoff circles */}
+          {/* Top zone faceoff circles (for away team view) */}
           <circle cx="20.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
           <circle cx="64.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
           
-          {/* Bottom zone faceoff circles */}
+          {/* Bottom zone faceoff circles (for home team view) */}
           <circle cx="20.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
           <circle cx="64.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
           
-          {/* Goal crease - Top */}
+          {/* Goal crease - Top (for away team view) */}
           <path 
             d="M 37 11 L 37 5 Q 42.5 5 42.5 5 Q 48 5 48 5 L 48 11 Z" 
             fill="#60a5fa" 
@@ -137,7 +159,7 @@ const TeamShotMap: React.FC<{ shots: Shot[]; team: Team; teamName: string }> = (
             strokeWidth="1"
           />
           
-          {/* Goal crease - Bottom */}
+          {/* Goal crease - Bottom (for home team view) */}
           <path 
             d="M 37 189 L 37 195 Q 42.5 195 42.5 195 Q 48 195 48 195 L 48 189 Z" 
             fill="#60a5fa" 
@@ -146,17 +168,17 @@ const TeamShotMap: React.FC<{ shots: Shot[]; team: Team; teamName: string }> = (
             strokeWidth="1"
           />
           
-          {/* Goal - Top */}
+          {/* Goal - Top (for away team view) */}
           <rect x="39.5" y="8.5" width="6" height="2.5" fill="none" stroke="#1f2937" strokeWidth="0.8" />
           
-          {/* Goal - Bottom */}
+          {/* Goal - Bottom (for home team view) */}
           <rect x="39.5" y="189" width="6" height="2.5" fill="none" stroke="#1f2937" strokeWidth="0.8" />
         </svg>
         
         {/* Shot markers overlay */}
         <div className="absolute inset-0 pointer-events-none">
           {teamShots.map((shot) => (
-            <ShotMarkerSummary key={shot.id} shot={shot} />
+            <ShotMarkerSummary key={shot.id} shot={shot} isHalfRink={true} />
           ))}
         </div>
       </div>
