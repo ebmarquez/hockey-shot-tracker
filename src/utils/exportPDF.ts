@@ -99,7 +99,7 @@ export const exportToPDF = async (
         }
 
         const periodLabel = shot.period === 'OT' ? 'OT' : `P${shot.period}`;
-        const text = `${index + 1}. ${periodLabel} ${shot.team.toUpperCase()} - ${shot.shotType} - ${shot.result}`;
+        const text = `${index + 1}. ${periodLabel} ${shot.team.toUpperCase()} - ${shot.result}`;
         pdf.text(text, 15, yPos);
         yPos += 5;
       });
