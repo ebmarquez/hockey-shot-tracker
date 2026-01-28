@@ -104,6 +104,23 @@ describe('Share Utilities', () => {
 
       expect(canShareFiles([mockFile])).toBe(false);
     });
+
+    it('should return false when canShare throws an error', () => {
+      const mockFile = new File(['test'], 'test.png', { type: 'image/png' });
+      
+      Object.defineProperty(globalThis, 'navigator', {
+        value: {
+          share: vi.fn(),
+          canShare: vi.fn(() => {
+            throw new Error('File sharing not supported');
+          }),
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      expect(canShareFiles([mockFile])).toBe(false);
+    });
   });
 
   describe('shareGameSummary', () => {
