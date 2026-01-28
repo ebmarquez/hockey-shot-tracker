@@ -13,11 +13,16 @@ export const canShare = (): boolean => {
  * Check if Web Share API supports sharing files
  */
 export const canShareFiles = (files: File[]): boolean => {
-  return (
-    canShare() &&
-    navigator.canShare !== undefined &&
-    navigator.canShare({ files })
-  );
+  try {
+    return (
+      canShare() &&
+      navigator.canShare !== undefined &&
+      navigator.canShare({ files })
+    );
+  } catch {
+    // Some browsers throw when canShare is called with files
+    return false;
+  }
 };
 
 /**
