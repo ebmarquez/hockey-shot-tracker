@@ -351,21 +351,26 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
           {/* Boards (outer boundary) - 28 ft corner radius */}
           <rect x="0" y="0" width="85" height="200" fill="none" stroke="#1e3a8a" strokeWidth="2" rx="28" ry="28" />
           
-          {/* Center red line - at 100 ft (center), 12 inches = 1 ft wide */}
-          <rect x="0" y="99.5" width="85" height="1" fill="#dc2626" />
+          {/* Center red line - at 100 ft (center), 12 inches = 1 ft wide
+              Starts at x=1 to stay inside board stroke (strokeWidth=2 means 1 ft inward) */}
+          <rect x="1" y="99.5" width="83" height="1" fill="#dc2626" />
           
-          {/* Blue lines - 75 ft from each end, 12 inches = 1 ft wide */}
-          <rect x="0" y="74.5" width="85" height="1" fill="#2563eb" />
-          <rect x="0" y="124.5" width="85" height="1" fill="#2563eb" />
+          {/* Blue lines - 75 ft from each end, 12 inches = 1 ft wide
+              Starts at x=1 to stay inside board stroke */}
+          <rect x="1" y="74.5" width="83" height="1" fill="#2563eb" />
+          <rect x="1" y="124.5" width="83" height="1" fill="#2563eb" />
           
           {/* Goal lines - 11 ft from end boards, 2 inches wide (~0.17 ft)
-              Goal lines need to be clipped to fit within the rounded corners.
-              At y=11, the corner arc cuts into the ice surface.
-              Corner radius = 28 ft, corner center at (28, 28) and (57, 28)
-              At y=11: x_offset = 28 - sqrt(28² - 17²) = 28 - sqrt(784-289) = 28 - 22.25 ≈ 5.75
-              So goal line starts at x≈5.75 and ends at x≈79.25 (width ≈ 73.5) */}
-          <rect x="5.75" y="10.9" width="73.5" height="0.2" fill="#dc2626" />
-          <rect x="5.75" y="188.9" width="73.5" height="0.2" fill="#dc2626" />
+              Goal lines need to be clipped to fit within the rounded corners AND
+              inside the board stroke (strokeWidth=2, so inner edge is 1 ft inside path).
+              At y=11, the corner arc (inner edge) cuts into the ice surface.
+              Corner radius = 28 ft, inner radius = 27 ft (28 - strokeWidth/2)
+              Corner center at (28, 28) and (57, 28)
+              At y=11: vertical distance from center = 17
+              x_offset = 28 - sqrt(27² - 17²) = 28 - sqrt(729-289) = 28 - 20.98 ≈ 7
+              So goal line starts at x≈7 and ends at x≈78 (width ≈ 71) */}
+          <rect x="7" y="10.9" width="71" height="0.2" fill="#dc2626" />
+          <rect x="7" y="188.9" width="71" height="0.2" fill="#dc2626" />
           
           {/* Center ice circle - 30 ft diameter = 15 ft radius */}
           <circle cx="42.5" cy="100" r="15" fill="none" stroke="#2563eb" strokeWidth="0.5" />
