@@ -31,17 +31,17 @@ const ShotMarkerSummary: React.FC<{ shot: Shot; isHalfRink: boolean }> = ({ shot
   // Rink Y (0-100, top to bottom) -> Screen X (0-100, left to right)
   const screenLeft = shot.y;  // Rink Y becomes screen X
   
-  // For half-rink display, we need to remap the Y coordinate
+  // For half-rink display, we need to remap the screen Y coordinate (which comes from rink X)
   // Home team: shots are in bottom half (x > 50), remap 50-100 to 0-100
   // Away team: shots are in top half (x < 50), remap 0-50 to 0-100
   let screenTop = shot.x;
   if (isHalfRink) {
     if (isHome) {
-      // Home shots: x ranges from 50-100, remap to 0-100
-      screenTop = (shot.x - 50) * 2;
+      // Home shots: x ranges from 50-100, remap to 0-100 (clamped for edge cases)
+      screenTop = Math.max(0, Math.min(100, (shot.x - 50) * 2));
     } else {
-      // Away shots: x ranges from 0-50, remap to 0-100
-      screenTop = shot.x * 2;
+      // Away shots: x ranges from 0-50, remap to 0-100 (clamped for edge cases)
+      screenTop = Math.max(0, Math.min(100, shot.x * 2));
     }
   }
 
@@ -93,9 +93,9 @@ const TeamShotMap: React.FC<{ shots: Shot[]; team: Team; teamName: string }> = (
   const isHome = team === 'home';
   const uniqueId = `team-${team}`;
 
-  // viewBox for half rink:
-  // Home team (bottom half): y from 100 to 200 in full rink coordinates
-  // Away team (top half): y from 0 to 100 in full rink coordinates
+  // viewBox format: "minX minY width height"
+  // Home team (bottom half): viewBox starts at y=100 with height=100 (shows y=100 to y=200)
+  // Away team (top half): viewBox starts at y=0 with height=100 (shows y=0 to y=100)
   const viewBox = isHome ? "0 100 85 100" : "0 0 85 100";
 
   return (
