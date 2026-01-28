@@ -358,9 +358,14 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
           <rect x="0" y="74.5" width="85" height="1" fill="#2563eb" />
           <rect x="0" y="124.5" width="85" height="1" fill="#2563eb" />
           
-          {/* Goal lines - 11 ft from end boards, 2 inches wide (~0.17 ft) */}
-          <rect x="0" y="10.9" width="85" height="0.2" fill="#dc2626" />
-          <rect x="0" y="188.9" width="85" height="0.2" fill="#dc2626" />
+          {/* Goal lines - 11 ft from end boards, 2 inches wide (~0.17 ft)
+              Goal lines need to be clipped to fit within the rounded corners.
+              At y=11, the corner arc cuts into the ice surface.
+              Corner radius = 28 ft, corner center at (28, 28) and (57, 28)
+              At y=11: x_offset = 28 - sqrt(28² - 17²) = 28 - sqrt(784-289) = 28 - 22.25 ≈ 5.75
+              So goal line starts at x≈5.75 and ends at x≈79.25 (width ≈ 73.5) */}
+          <rect x="5.75" y="10.9" width="73.5" height="0.2" fill="#dc2626" />
+          <rect x="5.75" y="188.9" width="73.5" height="0.2" fill="#dc2626" />
           
           {/* Center ice circle - 30 ft diameter = 15 ft radius */}
           <circle cx="42.5" cy="100" r="15" fill="none" stroke="#2563eb" strokeWidth="0.5" />
