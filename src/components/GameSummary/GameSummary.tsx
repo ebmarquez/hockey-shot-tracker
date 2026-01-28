@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import type { Game, Shot, Period } from '../../types';
-import ShotMarker from '../ShotMarker/ShotMarker';
+import type { Game, Shot, Team, Period } from '../../types';
 import { calculateShootingPercentage } from '../../utils/shootingPercentage';
 import { calculatePerPeriodStats, formatPeriodLabel } from '../../utils/periodStats';
 import { exportToPNG, elementToCanvas, canvasToBlob } from '../../utils/exportImage';
@@ -14,54 +13,179 @@ interface GameSummaryProps {
 }
 
 /**
- * MiniRink component - A scaled-down version of the Rink for period shot maps
+ * ShotMarkerSummary - A shot marker for summary view that correctly maps coordinates
+ * Uses the same vertical rink coordinate system as the main Rink component
+ * Adjusted for half-rink display (home shows bottom half, away shows top half)
  */
-const MiniRink: React.FC<{ shots: Shot[]; period: Period }> = ({ shots, period }) => {
-  const periodShots = shots.filter(shot => shot.period === period);
+const ShotMarkerSummary: React.FC<{ shot: Shot; isHalfRink: boolean }> = ({ shot, isHalfRink }) => {
+  const isGoal = shot.result === 'goal';
+  const isHome = shot.team === 'home';
+
+  // Colors: home = red/coral, away = gray/slate
+  const strokeColor = isHome ? '#f87171' : '#94a3b8';
+  const fillColor = isGoal ? (isHome ? '#ef4444' : '#64748b') : 'transparent';
+
+  // For vertical rink: transform horizontal rink coordinates to vertical screen coordinates
+  // Same transformation as the main Rink's ShotMarker
+  // Rink X (0-100, left to right) -> Screen Y (0-100, top to bottom)
+  // Rink Y (0-100, top to bottom) -> Screen X (0-100, left to right)
+  const screenLeft = shot.y;  // Rink Y becomes screen X
+  
+  // For half-rink display, we need to remap the screen Y coordinate (which comes from rink X)
+  // Home team: shots are in bottom half (x > 50), remap 50-100 to 0-100
+  // Away team: shots are in top half (x < 50), remap 0-50 to 0-100
+  let screenTop = shot.x;
+  if (isHalfRink) {
+    if (isHome) {
+      // Home shots: x ranges from 50-100, remap to 0-100 (clamped for edge cases)
+      screenTop = Math.max(0, Math.min(100, (shot.x - 50) * 2));
+    } else {
+      // Away shots: x ranges from 0-50, remap to 0-100 (clamped for edge cases)
+      screenTop = Math.max(0, Math.min(100, shot.x * 2));
+    }
+  }
 
   return (
-    <div className="relative w-full">
-      <div className="relative">
+    <div
+      className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+      style={{
+        left: `${screenLeft}%`,
+        top: `${screenTop}%`,
+      }}
+      title={`${shot.team} - ${shot.result} (${shot.shotType})`}
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24">
+        {/* Outer ring for goals */}
+        {isGoal && (
+          <circle
+            cx="12"
+            cy="12"
+            r="11"
+            fill="none"
+            stroke={isHome ? '#fca5a5' : '#cbd5e1'}
+            strokeWidth="2"
+            opacity="0.7"
+          />
+        )}
+        {/* Main circle */}
+        <circle
+          cx="12"
+          cy="12"
+          r={isGoal ? 7 : 8}
+          fill={fillColor}
+          stroke={strokeColor}
+          strokeWidth="2"
+        />
+      </svg>
+    </div>
+  );
+};
+
+/**
+ * TeamShotMap component - A half-rink showing shots for a specific team
+ * Shows only the relevant half of the rink:
+ * - Home team: bottom half (attacking zone where home shots are recorded)
+ * - Away team: top half (attacking zone where away shots are recorded)
+ */
+const TeamShotMap: React.FC<{ shots: Shot[]; team: Team; teamName: string }> = ({ shots, team, teamName }) => {
+  const teamShots = shots.filter(shot => shot.team === team);
+  const goals = teamShots.filter(s => s.result === 'goal').length;
+  const isHome = team === 'home';
+  const uniqueId = `team-${team}`;
+
+  // viewBox format: "minX minY width height"
+  // Home team (bottom half): viewBox starts at y=100 with height=100 (shows y=100 to y=200)
+  // Away team (top half): viewBox starts at y=0 with height=100 (shows y=0 to y=100)
+  const viewBox = isHome ? "0 100 85 100" : "0 0 85 100";
+
+  return (
+    <div className="flex flex-col items-center">
+      {/* Team label */}
+      <div className={`text-xs font-semibold uppercase tracking-wide mb-1 ${isHome ? 'text-red-600' : 'text-blue-600'}`}>
+        {teamName}
+      </div>
+      
+      {/* Half Rink */}
+      <div className="relative w-full max-w-[140px]">
         <svg
-          viewBox="0 0 200 85"
+          viewBox={viewBox}
           className="w-full h-auto"
+          preserveAspectRatio="xMidYMid meet"
         >
-          {/* Ice surface with gradient */}
+          {/* Ice surface with gradient - vertical orientation */}
           <defs>
-            <linearGradient id={`ice-gradient-${period}`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <linearGradient id={`ice-gradient-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" style={{ stopColor: '#e8f4f8', stopOpacity: 1 }} />
               <stop offset="50%" style={{ stopColor: '#ffffff', stopOpacity: 1 }} />
               <stop offset="100%" style={{ stopColor: '#e8f4f8', stopOpacity: 1 }} />
             </linearGradient>
           </defs>
           
-          {/* Ice surface */}
-          <rect x="0" y="0" width="200" height="85" fill={`url(#ice-gradient-${period})`} />
+          {/* Ice surface - full rink (we'll clip via viewBox) */}
+          <rect x="0" y="0" width="85" height="200" fill={`url(#ice-gradient-${uniqueId})`} />
           
-          {/* Boards */}
-          <rect x="0" y="0" width="200" height="85" fill="none" stroke="#1e3a8a" strokeWidth="1.5" rx="4" />
+          {/* Boards (outer boundary) */}
+          <rect x="0" y="0" width="85" height="200" fill="none" stroke="#1e3a8a" strokeWidth="1.2" rx="4" />
           
-          {/* Center red line */}
-          <rect x="98.5" y="0" width="3" height="85" fill="#dc2626" />
+          {/* Center red line - horizontal in vertical rink */}
+          <rect x="0" y="98.5" width="85" height="3" fill="#dc2626" />
           
-          {/* Blue lines */}
-          <rect x="58.5" y="0" width="2.5" height="85" fill="#2563eb" />
-          <rect x="139" y="0" width="2.5" height="85" fill="#2563eb" />
+          {/* Blue lines - horizontal in vertical rink */}
+          <rect x="0" y="58.5" width="85" height="2.5" fill="#2563eb" />
+          <rect x="0" y="139" width="85" height="2.5" fill="#2563eb" />
           
-          {/* Goal lines */}
-          <rect x="10.5" y="0" width="1" height="85" fill="#dc2626" />
-          <rect x="188.5" y="0" width="1" height="85" fill="#dc2626" />
+          {/* Goal lines (thin red) - horizontal in vertical rink */}
+          <rect x="0" y="10.5" width="85" height="1" fill="#dc2626" />
+          <rect x="0" y="188.5" width="85" height="1" fill="#dc2626" />
           
           {/* Center ice circle */}
-          <circle cx="100" cy="42.5" r="15" fill="none" stroke="#2563eb" strokeWidth="1" />
+          <circle cx="42.5" cy="100" r="15" fill="none" stroke="#2563eb" strokeWidth="1" />
+          <circle cx="42.5" cy="100" r="1" fill="#2563eb" />
+          
+          {/* Top zone faceoff circles (for away team view) */}
+          <circle cx="20.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          <circle cx="64.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          
+          {/* Bottom zone faceoff circles (for home team view) */}
+          <circle cx="20.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          <circle cx="64.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          
+          {/* Goal crease - Top (for away team view) */}
+          <path 
+            d="M 37 11 L 37 5 Q 42.5 5 42.5 5 Q 48 5 48 5 L 48 11 Z" 
+            fill="#60a5fa" 
+            fillOpacity="0.4" 
+            stroke="#2563eb" 
+            strokeWidth="1"
+          />
+          
+          {/* Goal crease - Bottom (for home team view) */}
+          <path 
+            d="M 37 189 L 37 195 Q 42.5 195 42.5 195 Q 48 195 48 195 L 48 189 Z" 
+            fill="#60a5fa" 
+            fillOpacity="0.4" 
+            stroke="#2563eb" 
+            strokeWidth="1"
+          />
+          
+          {/* Goal - Top (for away team view) */}
+          <rect x="39.5" y="8.5" width="6" height="2.5" fill="none" stroke="#1f2937" strokeWidth="0.8" />
+          
+          {/* Goal - Bottom (for home team view) */}
+          <rect x="39.5" y="189" width="6" height="2.5" fill="none" stroke="#1f2937" strokeWidth="0.8" />
         </svg>
         
         {/* Shot markers overlay */}
         <div className="absolute inset-0 pointer-events-none">
-          {periodShots.map((shot) => (
-            <ShotMarker key={shot.id} shot={shot} />
+          {teamShots.map((shot) => (
+            <ShotMarkerSummary key={shot.id} shot={shot} isHalfRink={true} />
           ))}
         </div>
+      </div>
+      
+      {/* Stats below rink */}
+      <div className="text-xs text-center mt-1 text-gray-600">
+        {teamShots.length} {teamShots.length === 1 ? 'shot' : 'shots'} • {goals} {goals === 1 ? 'goal' : 'goals'}
       </div>
     </div>
   );
@@ -102,14 +226,6 @@ const GameSummary: React.FC<GameSummaryProps> = ({ isOpen, onClose, game }) => {
   
   const homeShootingPct = calculateShootingPercentage(homeGoals, homeShots.length);
   const awayShootingPct = calculateShootingPercentage(awayGoals, awayShots.length);
-
-  // Define all periods and determine which have shots
-  const allPeriods: Period[] = [1, 2, 3, 'OT'];
-  const periodsWithShots = allPeriods.filter(period => 
-    game.shots.some(shot => shot.period === period)
-  );
-  // If no shots, show all regular periods
-  const periodsToShow: Period[] = periodsWithShots.length > 0 ? periodsWithShots : [1, 2, 3];
 
   // Sort shots by timestamp (newest first)
   const sortedShots = [...game.shots].sort((a, b) => b.timestamp - a.timestamp);
@@ -244,26 +360,21 @@ const GameSummary: React.FC<GameSummaryProps> = ({ isOpen, onClose, game }) => {
           </div>
         </div>
 
-        {/* Period Shot Maps */}
+        {/* Team Shot Maps - Home on left, Away on right */}
         <div className="px-4 py-4 border-b border-gray-200" ref={shotMapRef}>
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 text-center">
-            Shot Maps by Period
+            Shot Maps by Team
           </h2>
-          <div className={`grid gap-3 ${periodsToShow.length <= 3 ? 'grid-cols-3' : 'grid-cols-2 md:grid-cols-4'}`}>
-            {periodsToShow.map((period) => {
-              const periodShots = game.shots.filter(s => s.period === period);
-              return (
-                <div key={period} className="bg-white rounded-lg border border-gray-200 p-2">
-                  <div className="text-xs font-semibold text-center text-gray-600 mb-1">
-                    {formatPeriodLabel(period)}
-                  </div>
-                  <MiniRink shots={game.shots} period={period} />
-                  <div className="text-xs text-center text-gray-500 mt-1">
-                    {periodShots.length} {periodShots.length === 1 ? 'shot' : 'shots'}
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Home Team Shot Map */}
+            <div className="bg-white rounded-lg border border-gray-200 p-3">
+              <TeamShotMap shots={game.shots} team="home" teamName={game.homeTeam} />
+            </div>
+            
+            {/* Away Team Shot Map */}
+            <div className="bg-white rounded-lg border border-gray-200 p-3">
+              <TeamShotMap shots={game.shots} team="away" teamName={game.awayTeam} />
+            </div>
           </div>
         </div>
 
