@@ -99,39 +99,27 @@ describe('GameSummary', () => {
     });
   });
 
-  describe('Period Shot Maps', () => {
-    it('should show mini shot map for each period with shots', () => {
+  describe('Team Shot Maps', () => {
+    it('should show team shot maps for home and away teams', () => {
       const shots = [
         createShot('home', 1, 'goal'),
         createShot('home', 2, 'save'),
-        createShot('home', 3, 'miss'),
+        createShot('away', 3, 'miss'),
       ];
       const game = createMockGame(shots);
       const onClose = vi.fn();
 
       render(<GameSummary isOpen={true} onClose={onClose} game={game} />);
 
-      // Period labels appear in both shot maps and period stats
-      expect(screen.getAllByText('1st Period').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText('2nd Period').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText('3rd Period').length).toBeGreaterThanOrEqual(1);
+      // Should show Shot Maps by Team heading
+      expect(screen.getByText('Shot Maps by Team')).toBeInTheDocument();
+      
+      // Team names should appear in the shot maps (case-insensitive search since text transforms may apply)
+      expect(screen.getAllByText(/Home Team/i).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/Away Team/i).length).toBeGreaterThanOrEqual(1);
     });
 
-    it('should show OT period when overtime shots exist', () => {
-      const shots = [
-        createShot('home', 1, 'goal'),
-        createShot('home', 'OT', 'goal'),
-      ];
-      const game = createMockGame(shots);
-      const onClose = vi.fn();
-
-      render(<GameSummary isOpen={true} onClose={onClose} game={game} />);
-
-      // OT appears in shot maps, shot list, and period stats
-      expect(screen.getAllByText('OT').length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('should display shot counts for each period', () => {
+    it('should show correct shot counts for each team', () => {
       const shots = [
         createShot('home', 1, 'goal'),
         createShot('home', 1, 'save'),
@@ -143,8 +131,24 @@ describe('GameSummary', () => {
 
       render(<GameSummary isOpen={true} onClose={onClose} game={game} />);
 
-      expect(screen.getByText('3 shots')).toBeInTheDocument(); // Period 1
-      expect(screen.getByText('1 shot')).toBeInTheDocument(); // Period 2 - singular
+      // Home team: 3 shots, 2 goals
+      expect(screen.getByText('3 shots • 2 goals')).toBeInTheDocument();
+      // Away team: 1 shot, 0 goals  
+      expect(screen.getByText('1 shot • 0 goals')).toBeInTheDocument();
+    });
+
+    it('should show OT period in period stats when overtime shots exist', () => {
+      const shots = [
+        createShot('home', 1, 'goal'),
+        createShot('home', 'OT', 'goal'),
+      ];
+      const game = createMockGame(shots);
+      const onClose = vi.fn();
+
+      render(<GameSummary isOpen={true} onClose={onClose} game={game} />);
+
+      // OT appears in shot list and period stats
+      expect(screen.getAllByText('OT').length).toBeGreaterThanOrEqual(1);
     });
   });
 
