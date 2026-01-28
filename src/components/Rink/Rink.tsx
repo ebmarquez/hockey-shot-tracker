@@ -134,6 +134,81 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
     panTimeoutRef.current = setTimeout(() => setIsPanning(false), 50);
   };
 
+  /**
+   * Check if a point (in percentage coordinates) is within the ice rink boundary.
+   * The rink has rounded corners with a 28 ft radius on a 85x200 ft surface.
+   * This function checks if the point is inside the rounded rectangle shape.
+   * 
+   * @param xPercent - X position as percentage (0-100)
+   * @param yPercent - Y position as percentage (0-100)
+   * @returns true if point is within the rink boundary
+   */
+  const isWithinRinkBoundary = (xPercent: number, yPercent: number): boolean => {
+    // Convert percentage to rink coordinates (85 wide x 200 tall)
+    // Note: In the vertical rink display:
+    // - screenX (horizontal) maps to rink width (0-85)
+    // - screenY (vertical) maps to rink height (0-200)
+    const rinkWidth = 85;
+    const rinkHeight = 200;
+    const cornerRadius = 28; // NHL corner radius in feet
+    
+    // Convert percentage to actual rink coordinates
+    // xPercent is screen horizontal position -> rink Y (width)
+    // yPercent is screen vertical position -> rink X (height)
+    const rinkY = (xPercent / 100) * rinkWidth;  // 0-85
+    const rinkX = (yPercent / 100) * rinkHeight; // 0-200
+    
+    // Add a small margin inside the boards (2 ft / ~2.4% of width, ~1% of height)
+    const margin = 2;
+    
+    // Check if point is in the main rectangular area (excluding corners)
+    const inMainRect = 
+      rinkY >= margin && rinkY <= (rinkWidth - margin) &&
+      rinkX >= margin && rinkX <= (rinkHeight - margin);
+    
+    if (!inMainRect) {
+      return false;
+    }
+    
+    // Check corner regions - if we're in a corner zone, verify we're inside the rounded corner
+    const cornerZoneSize = cornerRadius + margin;
+    
+    // Top-left corner (rinkX < cornerRadius, rinkY < cornerRadius)
+    if (rinkX < cornerZoneSize && rinkY < cornerZoneSize) {
+      const dx = cornerZoneSize - rinkX;
+      const dy = cornerZoneSize - rinkY;
+      const effectiveRadius = cornerRadius - margin;
+      return (dx * dx + dy * dy) <= (effectiveRadius * effectiveRadius);
+    }
+    
+    // Top-right corner (rinkX < cornerRadius, rinkY > width - cornerRadius)
+    if (rinkX < cornerZoneSize && rinkY > (rinkWidth - cornerZoneSize)) {
+      const dx = cornerZoneSize - rinkX;
+      const dy = rinkY - (rinkWidth - cornerZoneSize);
+      const effectiveRadius = cornerRadius - margin;
+      return (dx * dx + dy * dy) <= (effectiveRadius * effectiveRadius);
+    }
+    
+    // Bottom-left corner (rinkX > height - cornerRadius, rinkY < cornerRadius)
+    if (rinkX > (rinkHeight - cornerZoneSize) && rinkY < cornerZoneSize) {
+      const dx = rinkX - (rinkHeight - cornerZoneSize);
+      const dy = cornerZoneSize - rinkY;
+      const effectiveRadius = cornerRadius - margin;
+      return (dx * dx + dy * dy) <= (effectiveRadius * effectiveRadius);
+    }
+    
+    // Bottom-right corner (rinkX > height - cornerRadius, rinkY > width - cornerRadius)
+    if (rinkX > (rinkHeight - cornerZoneSize) && rinkY > (rinkWidth - cornerZoneSize)) {
+      const dx = rinkX - (rinkHeight - cornerZoneSize);
+      const dy = rinkY - (rinkWidth - cornerZoneSize);
+      const effectiveRadius = cornerRadius - margin;
+      return (dx * dx + dy * dy) <= (effectiveRadius * effectiveRadius);
+    }
+    
+    // Point is in main area, not in a corner zone
+    return true;
+  };
+
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Don't register click if we were just panning or pinching
     if (isPanning || isPinching) {
@@ -180,6 +255,12 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
       const screenXPercent = (originalX / originalWidth) * 100;
       const screenYPercent = (originalY / originalHeight) * 100;
       
+      // Check if click is within the rink boundary (inside the boards)
+      if (!isWithinRinkBoundary(screenXPercent, screenYPercent)) {
+        // Click is outside the rink boundary, ignore it
+        return;
+      }
+      
       // Convert vertical screen coordinates to horizontal rink coordinates
       // Screen top (Y=0) -> Rink left (X=0, away zone)
       // Screen bottom (Y=100) -> Rink right (X=100, home zone)
@@ -217,14 +298,21 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
         }}
       >
         {/* 
-         * Rink sizing: width-based scaling
-         * - SVG uses w-full to match container width (same as home/away team cards)
-         * - Height auto-scales based on viewBox aspect ratio (85:200)
-         * - This ensures consistent sizing across different devices
+         * NHL Rink - Accurate Dimensions (200 ft × 85 ft)
+         * ViewBox: 85 × 200 (width × height) - 1 unit = 1 ft
+         * - Corner radius: 28 ft
+         * - Goal line: 11 ft from end boards
+         * - Blue lines: 75 ft from end boards (50 ft apart)
+         * - Center line: 100 ft (middle)
+         * - Faceoff circles: 15 ft radius (30 ft diameter)
+         * - End zone faceoff spots: 20 ft from goal line, 22 ft from center
+         * - Goal crease: 6 ft semi-circular radius
+         * - Trapezoid: 22 ft at goal line, 28 ft at boards (11 ft depth)
          */}
         <svg
           viewBox="0 0 85 200"
           className="w-full h-auto pointer-events-none mx-auto"
+          preserveAspectRatio="xMidYMid meet"
         >
           {/* Ice surface with gradient - vertical orientation */}
           <defs>
@@ -239,110 +327,155 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
               <rect width="20" height="20" fill="url(#ice-gradient)" />
               <circle cx="10" cy="10" r="0.3" fill="#d0e7f0" opacity="0.3" />
             </pattern>
+            
+            {/* Clip path for ice surface within boards (28 ft corner radius) */}
+            <clipPath id="rink-clip">
+              <rect x="0" y="0" width="85" height="200" rx="28" ry="28" />
+            </clipPath>
           </defs>
           
-          {/* Ice surface - vertical */}
-          <rect x="0" y="0" width="85" height="200" fill="url(#ice-texture)" />
+          {/* Ice surface - vertical, clipped to rink shape */}
+          <rect x="0" y="0" width="85" height="200" fill="url(#ice-texture)" clipPath="url(#rink-clip)" />
           
-          {/* Boards (outer boundary) - vertical */}
-          <rect x="0" y="0" width="85" height="200" fill="none" stroke="#1e3a8a" strokeWidth="1.2" rx="4" />
+          {/* Boards (outer boundary) - 28 ft corner radius */}
+          <rect x="0" y="0" width="85" height="200" fill="none" stroke="#1e3a8a" strokeWidth="2" rx="28" ry="28" />
           
-          {/* Center red line - horizontal in vertical rink */}
-          <rect x="0" y="98.5" width="85" height="3" fill="#dc2626" />
+          {/* Center red line - at 100 ft (center), 12 inches = 1 ft wide */}
+          <rect x="0" y="99.5" width="85" height="1" fill="#dc2626" />
           
-          {/* Blue lines - horizontal in vertical rink */}
-          <rect x="0" y="58.5" width="85" height="2.5" fill="#2563eb" />
-          <rect x="0" y="139" width="85" height="2.5" fill="#2563eb" />
+          {/* Blue lines - 75 ft from each end, 12 inches = 1 ft wide */}
+          <rect x="0" y="74.5" width="85" height="1" fill="#2563eb" />
+          <rect x="0" y="124.5" width="85" height="1" fill="#2563eb" />
           
-          {/* Goal lines (thin red) - horizontal in vertical rink */}
-          <rect x="0" y="10.5" width="85" height="1" fill="#dc2626" />
-          <rect x="0" y="188.5" width="85" height="1" fill="#dc2626" />
+          {/* Goal lines - 11 ft from end boards, 2 inches wide (~0.17 ft) */}
+          <rect x="0" y="10.9" width="85" height="0.2" fill="#dc2626" />
+          <rect x="0" y="188.9" width="85" height="0.2" fill="#dc2626" />
           
-          {/* Center ice circle */}
-          <circle cx="42.5" cy="100" r="15" fill="none" stroke="#2563eb" strokeWidth="1" />
-          <circle cx="42.5" cy="100" r="1" fill="#2563eb" />
+          {/* Center ice circle - 30 ft diameter = 15 ft radius */}
+          <circle cx="42.5" cy="100" r="15" fill="none" stroke="#2563eb" strokeWidth="0.5" />
           
-          {/* Center faceoff spot detail */}
-          <line x1="42.5" y1="92" x2="42.5" y2="108" stroke="#2563eb" strokeWidth="0.5" />
-          <line x1="34.5" y1="100" x2="50.5" y2="100" stroke="#2563eb" strokeWidth="0.5" />
+          {/* Center faceoff spot - 12 inches (1 ft) diameter */}
+          <circle cx="42.5" cy="100" r="0.5" fill="#2563eb" />
           
-          {/* Top zone faceoff circles (was left zone) */}
-          <circle cx="20.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
-          <circle cx="64.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          {/* End zone faceoff circles - 30 ft diameter = 15 ft radius
+              Position: 20 ft from goal line (11+20=31 ft from end), 22 ft from center */}
+          {/* Top zone (away zone) faceoff circles */}
+          <circle cx="20.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="0.5" />
+          <circle cx="64.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="0.5" />
           
-          {/* Top zone faceoff spots */}
+          {/* Top zone faceoff spots - 2 ft diameter = 1 ft radius */}
           <circle cx="20.5" cy="31" r="1" fill="#dc2626" />
           <circle cx="64.5" cy="31" r="1" fill="#dc2626" />
           
-          {/* Top zone faceoff details */}
-          <rect x="15.5" y="26" width="10" height="2" fill="#dc2626" />
-          <rect x="15.5" y="33" width="10" height="2" fill="#dc2626" />
-          <rect x="59.5" y="26" width="10" height="2" fill="#dc2626" />
-          <rect x="59.5" y="33" width="10" height="2" fill="#dc2626" />
+          {/* Top zone faceoff circle hash marks (L-shaped) */}
+          {/* Left circle hash marks */}
+          <line x1="18.5" y1="29" x2="18.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="18.5" y1="26" x2="16.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="22.5" y1="29" x2="22.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="22.5" y1="26" x2="24.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="18.5" y1="33" x2="18.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="18.5" y1="36" x2="16.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="22.5" y1="33" x2="22.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="22.5" y1="36" x2="24.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Right circle hash marks */}
+          <line x1="62.5" y1="29" x2="62.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="62.5" y1="26" x2="60.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="66.5" y1="29" x2="66.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="66.5" y1="26" x2="68.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="62.5" y1="33" x2="62.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="62.5" y1="36" x2="60.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="66.5" y1="33" x2="66.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="66.5" y1="36" x2="68.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
           
-          {/* Bottom zone faceoff circles (was right zone) */}
-          <circle cx="20.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
-          <circle cx="64.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          {/* Bottom zone (home zone) faceoff circles */}
+          <circle cx="20.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="0.5" />
+          <circle cx="64.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="0.5" />
           
           {/* Bottom zone faceoff spots */}
           <circle cx="20.5" cy="169" r="1" fill="#dc2626" />
           <circle cx="64.5" cy="169" r="1" fill="#dc2626" />
           
-          {/* Bottom zone faceoff details */}
-          <rect x="15.5" y="164" width="10" height="2" fill="#dc2626" />
-          <rect x="15.5" y="171" width="10" height="2" fill="#dc2626" />
-          <rect x="59.5" y="164" width="10" height="2" fill="#dc2626" />
-          <rect x="59.5" y="171" width="10" height="2" fill="#dc2626" />
+          {/* Bottom zone faceoff circle hash marks (L-shaped) */}
+          {/* Left circle hash marks */}
+          <line x1="18.5" y1="167" x2="18.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="18.5" y1="164" x2="16.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="22.5" y1="167" x2="22.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="22.5" y1="164" x2="24.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="18.5" y1="171" x2="18.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="18.5" y1="174" x2="16.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="22.5" y1="171" x2="22.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="22.5" y1="174" x2="24.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Right circle hash marks */}
+          <line x1="62.5" y1="167" x2="62.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="62.5" y1="164" x2="60.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="66.5" y1="167" x2="66.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="66.5" y1="164" x2="68.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="62.5" y1="171" x2="62.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="62.5" y1="174" x2="60.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="66.5" y1="171" x2="66.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="66.5" y1="174" x2="68.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
           
-          {/* Neutral zone faceoff spots */}
-          <circle cx="20.5" cy="80" r="1" fill="#dc2626" />
-          <circle cx="64.5" cy="80" r="1" fill="#dc2626" />
-          <circle cx="20.5" cy="120" r="1" fill="#dc2626" />
-          <circle cx="64.5" cy="120" r="1" fill="#dc2626" />
+          {/* Neutral zone faceoff spots - 2 ft diameter, located 5 ft from blue lines
+              Top neutral zone: y = 75 - 5 = 70
+              Bottom neutral zone: y = 125 + 5 = 130
+              X positions: 20.5 and 64.5 (same as end zone circles) */}
+          <circle cx="20.5" cy="70" r="1" fill="#dc2626" />
+          <circle cx="64.5" cy="70" r="1" fill="#dc2626" />
+          <circle cx="20.5" cy="130" r="1" fill="#dc2626" />
+          <circle cx="64.5" cy="130" r="1" fill="#dc2626" />
           
-          {/* Goal crease - Top (was left) */}
+          {/* Goal crease - Top (away zone)
+              Semi-circular, 6 ft radius from center of goal line
+              Goal is centered at x=42.5, goal line at y=11 */}
           <path 
-            d="M 37 11 L 37 5 Q 42.5 5 42.5 5 Q 48 5 48 5 L 48 11 Z" 
+            d="M 36.5 11 A 6 6 0 0 1 48.5 11" 
             fill="#60a5fa" 
-            fillOpacity="0.4" 
-            stroke="#2563eb" 
-            strokeWidth="1"
+            fillOpacity="0.3" 
+            stroke="#dc2626" 
+            strokeWidth="0.3"
           />
           
-          {/* Goal crease - Bottom (was right) */}
+          {/* Goal crease - Bottom (home zone)
+              Semi-circular, 6 ft radius from center of goal line
+              Goal line at y=189 */}
           <path 
-            d="M 37 189 L 37 195 Q 42.5 195 42.5 195 Q 48 195 48 195 L 48 189 Z" 
+            d="M 36.5 189 A 6 6 0 0 0 48.5 189" 
             fill="#60a5fa" 
-            fillOpacity="0.4" 
-            stroke="#2563eb" 
-            strokeWidth="1"
+            fillOpacity="0.3" 
+            stroke="#dc2626" 
+            strokeWidth="0.3"
           />
           
-          {/* Goal - Top (was left) */}
-          <rect x="39.5" y="8.5" width="6" height="2.5" fill="none" stroke="#1f2937" strokeWidth="0.8" />
-          <line x1="39.5" y1="8.5" x2="39.5" y2="11" stroke="#1f2937" strokeWidth="0.8" />
-          <line x1="45.5" y1="8.5" x2="45.5" y2="11" stroke="#1f2937" strokeWidth="0.8" />
+          {/* Goal - Top (away zone)
+              Goal opening: 6 ft wide (72 inches), centered at x=42.5
+              Goal depth: ~3.33 ft (40 inches) behind goal line
+              Goal line at y=11, so goal extends from y=11 to y=7.67 */}
+          <rect x="39.5" y="7.67" width="6" height="3.33" fill="none" stroke="#1f2937" strokeWidth="0.5" />
           
-          {/* Goal - Bottom (was right) */}
-          <rect x="39.5" y="189" width="6" height="2.5" fill="none" stroke="#1f2937" strokeWidth="0.8" />
-          <line x1="39.5" y1="189" x2="39.5" y2="191.5" stroke="#1f2937" strokeWidth="0.8" />
-          <line x1="45.5" y1="189" x2="45.5" y2="191.5" stroke="#1f2937" strokeWidth="0.8" />
+          {/* Goal - Bottom (home zone)
+              Goal line at y=189, so goal extends from y=189 to y=192.33 */}
+          <rect x="39.5" y="189" width="6" height="3.33" fill="none" stroke="#1f2937" strokeWidth="0.5" />
           
-          {/* Trapezoid behind goals - Top (was left) */}
+          {/* Trapezoid behind goals - Top (away zone)
+              Base at goal line: 22 ft wide (11 ft each side from center)
+              Base at end boards: 28 ft wide (14 ft each side from center)
+              Goal line at y=11, end boards at y=0
+              Center at x=42.5 */}
           <path 
-            d="M 28 11 L 23 0 L 62 0 L 57 11 Z" 
+            d="M 31.5 11 L 28.5 0 L 56.5 0 L 53.5 11" 
             fill="none" 
             stroke="#dc2626" 
-            strokeWidth="0.6"
+            strokeWidth="0.3"
             opacity="0.7"
           />
           
-          {/* Trapezoid behind goals - Bottom (was right) */}
+          {/* Trapezoid behind goals - Bottom (home zone)
+              Goal line at y=189, end boards at y=200 */}
           <path 
-            d="M 28 189 L 23 200 L 62 200 L 57 189 Z" 
+            d="M 31.5 189 L 28.5 200 L 56.5 200 L 53.5 189" 
             fill="none" 
             stroke="#dc2626" 
-            strokeWidth="0.6"
+            strokeWidth="0.3"
             opacity="0.7"
           />
         </svg>

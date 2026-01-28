@@ -97,32 +97,36 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
       );
     });
 
-    it('should map top-left click to 0%, 0% at scale 1x', () => {
+    it('should ignore top-left corner click at scale 1x (outside rounded boundary)', () => {
       mockUsePinchZoom(1);
       const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
       const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
 
+      // Click at exact top-left corner - this is outside the rounded corner boundary
       simulateClick(
         rinkElement,
         { left: 100, top: 100, width: 600, height: 300 },
         { x: 100, y: 100 }
       );
 
-      expect(mockOnShotLocation).toHaveBeenCalledWith(0, 0);
+      // Click should be ignored (outside rink boundary due to rounded corners)
+      expect(mockOnShotLocation).not.toHaveBeenCalled();
     });
 
-    it('should map bottom-right click to 100%, 100% at scale 1x', () => {
+    it('should ignore bottom-right corner click at scale 1x (outside rounded boundary)', () => {
       mockUsePinchZoom(1);
       const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
       const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
 
+      // Click at exact bottom-right corner - this is outside the rounded corner boundary
       simulateClick(
         rinkElement,
         { left: 100, top: 100, width: 600, height: 300 },
         { x: 700, y: 400 }
       );
 
-      expect(mockOnShotLocation).toHaveBeenCalledWith(100, 100);
+      // Click should be ignored (outside rink boundary due to rounded corners)
+      expect(mockOnShotLocation).not.toHaveBeenCalled();
     });
 
     it('should map quarter position clicks correctly at scale 1x', () => {
@@ -194,36 +198,36 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
       );
     });
 
-    it('should map top-left visible area to correct percentage at scale 2x', () => {
+    it('should ignore top-left corner click at scale 2x (outside rounded boundary)', () => {
       mockUsePinchZoom(2);
       const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
       const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
 
-      // Click at top-left of visible area
+      // Click at top-left of visible area - outside rounded boundary
       simulateClick(
         rinkElement,
         { left: 100, top: 100, width: 1200, height: 600 },
         { x: 100, y: 100 }
       );
 
-      // Should clamp to 0, 0
-      expect(mockOnShotLocation).toHaveBeenCalledWith(0, 0);
+      // Click should be ignored (outside rink boundary due to rounded corners)
+      expect(mockOnShotLocation).not.toHaveBeenCalled();
     });
 
-    it('should map bottom-right visible area to correct percentage at scale 2x', () => {
+    it('should ignore bottom-right corner click at scale 2x (outside rounded boundary)', () => {
       mockUsePinchZoom(2);
       const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
       const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
 
-      // Click at bottom-right of visible area
+      // Click at bottom-right of visible area - outside rounded boundary
       simulateClick(
         rinkElement,
         { left: 100, top: 100, width: 1200, height: 600 },
         { x: 1300, y: 700 }
       );
 
-      // Should clamp to 100, 100
-      expect(mockOnShotLocation).toHaveBeenCalledWith(100, 100);
+      // Click should be ignored (outside rink boundary due to rounded corners)
+      expect(mockOnShotLocation).not.toHaveBeenCalled();
     });
   });
 
@@ -271,38 +275,36 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
   });
 
   describe('Edge Cases and Boundary Clamping', () => {
-    it('should clamp coordinates outside bounds to 0-100 range', () => {
+    it('should ignore clicks outside rink boundary (beyond corner radius)', () => {
       mockUsePinchZoom(2);
       const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
       const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
 
-      // Click way outside the element
+      // Click way outside the element - these should be ignored as they're outside the rink
       simulateClick(
         rinkElement,
         { left: 100, top: 100, width: 1200, height: 600 },
         { x: 2000, y: 1000 }
       );
 
-      const [x, y] = mockOnShotLocation.mock.calls[0];
-      expect(x).toBe(100); // Clamped to max
-      expect(y).toBe(100); // Clamped to max
+      // Click should be ignored (outside rink boundary)
+      expect(mockOnShotLocation).not.toHaveBeenCalled();
     });
 
-    it('should clamp negative coordinates to 0', () => {
+    it('should ignore clicks at extreme corners (outside rounded corner boundary)', () => {
       mockUsePinchZoom(2);
       const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
       const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
 
-      // Click before the element
+      // Click at the very corner - outside the rounded boundary
       simulateClick(
         rinkElement,
         { left: 100, top: 100, width: 1200, height: 600 },
-        { x: 0, y: 0 }
+        { x: 100, y: 100 }  // top-left corner
       );
 
-      const [x, y] = mockOnShotLocation.mock.calls[0];
-      expect(x).toBe(0); // Clamped to min
-      expect(y).toBe(0); // Clamped to min
+      // Click should be ignored (in corner area outside rounded boundary)
+      expect(mockOnShotLocation).not.toHaveBeenCalled();
     });
 
     it('should handle fractional scale values correctly', () => {
