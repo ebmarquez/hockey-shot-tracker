@@ -175,19 +175,33 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
       const originalX = afterScale.x + originalWidth / 2;
       const originalY = afterScale.y + originalHeight / 2;
       
-      // Convert to percentage (0-100)
-      const x = (originalX / originalWidth) * 100;
-      const y = (originalY / originalHeight) * 100;
+      // For vertical rink: screen Y maps to rink X (inverted), screen X maps to rink Y
+      // Top of screen = away zone (low X), Bottom of screen = home zone (high X)
+      const screenXPercent = (originalX / originalWidth) * 100;
+      const screenYPercent = (originalY / originalHeight) * 100;
+      
+      // Convert vertical screen coordinates to horizontal rink coordinates
+      // Screen top (Y=0) -> Rink left (X=0, away zone)
+      // Screen bottom (Y=100) -> Rink right (X=100, home zone)
+      const rinkX = screenYPercent;  // Screen Y becomes rink X
+      const rinkY = screenXPercent;  // Screen X becomes rink Y
       
       onShotLocation(
-        Math.max(0, Math.min(100, x)),
-        Math.max(0, Math.min(100, y))
+        Math.max(0, Math.min(100, rinkX)),
+        Math.max(0, Math.min(100, rinkY))
       );
     }
   };
 
   return (
     <div className="relative w-full overflow-hidden">
+      {/* Zone Label - Top (Away Zone) */}
+      <div className="flex justify-center px-2 mb-1">
+        <span className="text-gray-400 text-sm">
+          {awayTeamName ? `${awayTeamName} Zone` : 'Away Zone'}
+        </span>
+      </div>
+      
       <div 
         ref={rinkRef}
         className="relative cursor-crosshair"
@@ -203,13 +217,13 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
         }}
       >
         <svg
-          viewBox="0 0 200 85"
+          viewBox="0 0 85 200"
           className="w-full h-auto pointer-events-none"
-          style={{ maxHeight: '60vh' }}
+          style={{ maxHeight: '70vh' }}
         >
-          {/* Ice surface with gradient */}
+          {/* Ice surface with gradient - vertical orientation */}
           <defs>
-            <linearGradient id="ice-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <linearGradient id="ice-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" style={{ stopColor: '#e8f4f8', stopOpacity: 1 }} />
               <stop offset="50%" style={{ stopColor: '#ffffff', stopOpacity: 1 }} />
               <stop offset="100%" style={{ stopColor: '#e8f4f8', stopOpacity: 1 }} />
@@ -222,105 +236,105 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
             </pattern>
           </defs>
           
-          {/* Ice surface */}
-          <rect x="0" y="0" width="200" height="85" fill="url(#ice-texture)" />
+          {/* Ice surface - vertical */}
+          <rect x="0" y="0" width="85" height="200" fill="url(#ice-texture)" />
           
-          {/* Boards (outer boundary) */}
-          <rect x="0" y="0" width="200" height="85" fill="none" stroke="#1e3a8a" strokeWidth="1.2" rx="4" />
+          {/* Boards (outer boundary) - vertical */}
+          <rect x="0" y="0" width="85" height="200" fill="none" stroke="#1e3a8a" strokeWidth="1.2" rx="4" />
           
-          {/* Center red line */}
-          <rect x="98.5" y="0" width="3" height="85" fill="#dc2626" />
+          {/* Center red line - horizontal in vertical rink */}
+          <rect x="0" y="98.5" width="85" height="3" fill="#dc2626" />
           
-          {/* Blue lines */}
-          <rect x="58.5" y="0" width="2.5" height="85" fill="#2563eb" />
-          <rect x="139" y="0" width="2.5" height="85" fill="#2563eb" />
+          {/* Blue lines - horizontal in vertical rink */}
+          <rect x="0" y="58.5" width="85" height="2.5" fill="#2563eb" />
+          <rect x="0" y="139" width="85" height="2.5" fill="#2563eb" />
           
-          {/* Goal lines (thin red) */}
-          <rect x="10.5" y="0" width="1" height="85" fill="#dc2626" />
-          <rect x="188.5" y="0" width="1" height="85" fill="#dc2626" />
+          {/* Goal lines (thin red) - horizontal in vertical rink */}
+          <rect x="0" y="10.5" width="85" height="1" fill="#dc2626" />
+          <rect x="0" y="188.5" width="85" height="1" fill="#dc2626" />
           
           {/* Center ice circle */}
-          <circle cx="100" cy="42.5" r="15" fill="none" stroke="#2563eb" strokeWidth="1" />
-          <circle cx="100" cy="42.5" r="1" fill="#2563eb" />
+          <circle cx="42.5" cy="100" r="15" fill="none" stroke="#2563eb" strokeWidth="1" />
+          <circle cx="42.5" cy="100" r="1" fill="#2563eb" />
           
           {/* Center faceoff spot detail */}
-          <line x1="92" y1="42.5" x2="108" y2="42.5" stroke="#2563eb" strokeWidth="0.5" />
-          <line x1="100" y1="34.5" x2="100" y2="50.5" stroke="#2563eb" strokeWidth="0.5" />
+          <line x1="42.5" y1="92" x2="42.5" y2="108" stroke="#2563eb" strokeWidth="0.5" />
+          <line x1="34.5" y1="100" x2="50.5" y2="100" stroke="#2563eb" strokeWidth="0.5" />
           
-          {/* Left zone faceoff circles */}
-          <circle cx="31" cy="20.5" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
-          <circle cx="31" cy="64.5" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          {/* Top zone faceoff circles (was left zone) */}
+          <circle cx="20.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          <circle cx="64.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
           
-          {/* Left zone faceoff spots */}
-          <circle cx="31" cy="20.5" r="1" fill="#dc2626" />
-          <circle cx="31" cy="64.5" r="1" fill="#dc2626" />
+          {/* Top zone faceoff spots */}
+          <circle cx="20.5" cy="31" r="1" fill="#dc2626" />
+          <circle cx="64.5" cy="31" r="1" fill="#dc2626" />
           
-          {/* Left zone faceoff details */}
-          <rect x="26" y="15.5" width="2" height="10" fill="#dc2626" />
-          <rect x="33" y="15.5" width="2" height="10" fill="#dc2626" />
-          <rect x="26" y="59.5" width="2" height="10" fill="#dc2626" />
-          <rect x="33" y="59.5" width="2" height="10" fill="#dc2626" />
+          {/* Top zone faceoff details */}
+          <rect x="15.5" y="26" width="10" height="2" fill="#dc2626" />
+          <rect x="15.5" y="33" width="10" height="2" fill="#dc2626" />
+          <rect x="59.5" y="26" width="10" height="2" fill="#dc2626" />
+          <rect x="59.5" y="33" width="10" height="2" fill="#dc2626" />
           
-          {/* Right zone faceoff circles */}
-          <circle cx="169" cy="20.5" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
-          <circle cx="169" cy="64.5" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          {/* Bottom zone faceoff circles (was right zone) */}
+          <circle cx="20.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          <circle cx="64.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
           
-          {/* Right zone faceoff spots */}
-          <circle cx="169" cy="20.5" r="1" fill="#dc2626" />
-          <circle cx="169" cy="64.5" r="1" fill="#dc2626" />
+          {/* Bottom zone faceoff spots */}
+          <circle cx="20.5" cy="169" r="1" fill="#dc2626" />
+          <circle cx="64.5" cy="169" r="1" fill="#dc2626" />
           
-          {/* Right zone faceoff details */}
-          <rect x="164" y="15.5" width="2" height="10" fill="#dc2626" />
-          <rect x="171" y="15.5" width="2" height="10" fill="#dc2626" />
-          <rect x="164" y="59.5" width="2" height="10" fill="#dc2626" />
-          <rect x="171" y="59.5" width="2" height="10" fill="#dc2626" />
+          {/* Bottom zone faceoff details */}
+          <rect x="15.5" y="164" width="10" height="2" fill="#dc2626" />
+          <rect x="15.5" y="171" width="10" height="2" fill="#dc2626" />
+          <rect x="59.5" y="164" width="10" height="2" fill="#dc2626" />
+          <rect x="59.5" y="171" width="10" height="2" fill="#dc2626" />
           
           {/* Neutral zone faceoff spots */}
-          <circle cx="80" cy="20.5" r="1" fill="#dc2626" />
-          <circle cx="80" cy="64.5" r="1" fill="#dc2626" />
-          <circle cx="120" cy="20.5" r="1" fill="#dc2626" />
-          <circle cx="120" cy="64.5" r="1" fill="#dc2626" />
+          <circle cx="20.5" cy="80" r="1" fill="#dc2626" />
+          <circle cx="64.5" cy="80" r="1" fill="#dc2626" />
+          <circle cx="20.5" cy="120" r="1" fill="#dc2626" />
+          <circle cx="64.5" cy="120" r="1" fill="#dc2626" />
           
-          {/* Goal creases - Left */}
+          {/* Goal crease - Top (was left) */}
           <path 
-            d="M 11 37 L 5 37 Q 5 42.5 5 42.5 Q 5 48 5 48 L 11 48 Z" 
+            d="M 37 11 L 37 5 Q 42.5 5 42.5 5 Q 48 5 48 5 L 48 11 Z" 
             fill="#60a5fa" 
             fillOpacity="0.4" 
             stroke="#2563eb" 
             strokeWidth="1"
           />
           
-          {/* Goal creases - Right */}
+          {/* Goal crease - Bottom (was right) */}
           <path 
-            d="M 189 37 L 195 37 Q 195 42.5 195 42.5 Q 195 48 195 48 L 189 48 Z" 
+            d="M 37 189 L 37 195 Q 42.5 195 42.5 195 Q 48 195 48 195 L 48 189 Z" 
             fill="#60a5fa" 
             fillOpacity="0.4" 
             stroke="#2563eb" 
             strokeWidth="1"
           />
           
-          {/* Goals - Left */}
-          <rect x="8.5" y="39.5" width="2.5" height="6" fill="none" stroke="#1f2937" strokeWidth="0.8" />
-          <line x1="8.5" y1="39.5" x2="11" y2="39.5" stroke="#1f2937" strokeWidth="0.8" />
-          <line x1="8.5" y1="45.5" x2="11" y2="45.5" stroke="#1f2937" strokeWidth="0.8" />
+          {/* Goal - Top (was left) */}
+          <rect x="39.5" y="8.5" width="6" height="2.5" fill="none" stroke="#1f2937" strokeWidth="0.8" />
+          <line x1="39.5" y1="8.5" x2="39.5" y2="11" stroke="#1f2937" strokeWidth="0.8" />
+          <line x1="45.5" y1="8.5" x2="45.5" y2="11" stroke="#1f2937" strokeWidth="0.8" />
           
-          {/* Goals - Right */}
-          <rect x="189" y="39.5" width="2.5" height="6" fill="none" stroke="#1f2937" strokeWidth="0.8" />
-          <line x1="189" y1="39.5" x2="191.5" y2="39.5" stroke="#1f2937" strokeWidth="0.8" />
-          <line x1="189" y1="45.5" x2="191.5" y2="45.5" stroke="#1f2937" strokeWidth="0.8" />
+          {/* Goal - Bottom (was right) */}
+          <rect x="39.5" y="189" width="6" height="2.5" fill="none" stroke="#1f2937" strokeWidth="0.8" />
+          <line x1="39.5" y1="189" x2="39.5" y2="191.5" stroke="#1f2937" strokeWidth="0.8" />
+          <line x1="45.5" y1="189" x2="45.5" y2="191.5" stroke="#1f2937" strokeWidth="0.8" />
           
-          {/* Trapezoid behind goals - Left */}
+          {/* Trapezoid behind goals - Top (was left) */}
           <path 
-            d="M 11 28 L 0 23 L 0 62 L 11 57 Z" 
+            d="M 28 11 L 23 0 L 62 0 L 57 11 Z" 
             fill="none" 
             stroke="#dc2626" 
             strokeWidth="0.6"
             opacity="0.7"
           />
           
-          {/* Trapezoid behind goals - Right */}
+          {/* Trapezoid behind goals - Bottom (was right) */}
           <path 
-            d="M 189 28 L 200 23 L 200 62 L 189 57 Z" 
+            d="M 28 189 L 23 200 L 62 200 L 57 189 Z" 
             fill="none" 
             stroke="#dc2626" 
             strokeWidth="0.6"
@@ -334,11 +348,8 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
         </div>
       </div>
       
-      {/* Zone Labels */}
-      <div className="flex justify-between px-2 mt-1">
-        <span className="text-gray-400 text-sm">
-          {awayTeamName ? `${awayTeamName} Zone` : 'Away Zone'}
-        </span>
+      {/* Zone Label - Bottom (Home Zone) */}
+      <div className="flex justify-center px-2 mt-1">
         <span className="text-gray-400 text-sm">
           {homeTeamName ? `${homeTeamName} Zone` : 'Home Zone'}
         </span>

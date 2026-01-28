@@ -70,7 +70,7 @@ describe('Zone Labels', () => {
     expect(screen.queryByText('Rangers Zone')).not.toBeInTheDocument();
   });
 
-  it('should position away zone label on left and home zone label on right', () => {
+  it('should position away zone label at top and home zone label at bottom', () => {
     render(
       <Rink 
         onShotLocation={mockOnShotLocation}
@@ -82,15 +82,13 @@ describe('Zone Labels', () => {
     const awayLabel = screen.getByText('Rangers Zone');
     const homeLabel = screen.getByText('Bruins Zone');
     
-    // Both labels should be in a flex container with justify-between
-    const container = awayLabel.parentElement;
-    expect(container).toHaveClass('flex', 'justify-between');
+    // Away zone label should be in a flex container with justify-center (top of rink)
+    const awayContainer = awayLabel.parentElement;
+    expect(awayContainer).toHaveClass('flex', 'justify-center');
     
-    // Away zone should be the first child (left side)
-    expect(container?.firstChild).toContainElement(awayLabel);
-    
-    // Home zone should be the last child (right side)
-    expect(container?.lastChild).toContainElement(homeLabel);
+    // Home zone label should be in a flex container with justify-center (bottom of rink)
+    const homeContainer = homeLabel.parentElement;
+    expect(homeContainer).toHaveClass('flex', 'justify-center');
   });
 
   it('should have subtle styling (gray text, small font)', () => {
