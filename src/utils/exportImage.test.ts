@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { elementToCanvas, canvasToBlob, exportToPNG } from './exportImage';
 
 // Mock html2canvas
@@ -11,13 +11,18 @@ import html2canvas from 'html2canvas';
 describe('Export Image Utilities', () => {
   let mockElement: HTMLElement;
   let mockCanvas: HTMLCanvasElement;
+  let originalCreateElement: typeof document.createElement;
 
   beforeEach(() => {
+    // Store original createElement
+    originalCreateElement = document.createElement.bind(document);
+    
     // Create mock element
-    mockElement = document.createElement('div');
+    mockElement = originalCreateElement('div');
+    document.body.appendChild(mockElement);
 
     // Create mock canvas
-    mockCanvas = document.createElement('canvas');
+    mockCanvas = originalCreateElement('canvas') as HTMLCanvasElement;
     mockCanvas.width = 800;
     mockCanvas.height = 600;
 
@@ -25,17 +30,32 @@ describe('Export Image Utilities', () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    // Cleanup
+    if (mockElement.parentNode) {
+      mockElement.parentNode.removeChild(mockElement);
+    }
+    // Remove any iframes left over
+    document.querySelectorAll('iframe').forEach(iframe => iframe.remove());
+  });
+
   describe('elementToCanvas', () => {
-    it('should convert element to canvas using html2canvas', async () => {
+    it('should convert element to canvas using html2canvas with foreignObjectRendering', async () => {
       vi.mocked(html2canvas).mockResolvedValue(mockCanvas);
 
       const result = await elementToCanvas(mockElement);
 
-      expect(html2canvas).toHaveBeenCalledWith(mockElement, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-      });
+      // html2canvas should be called with a cloned element (not the original)
+      // and with foreignObjectRendering: true option
+      expect(html2canvas).toHaveBeenCalledWith(
+        expect.any(HTMLElement),
+        expect.objectContaining({
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          foreignObjectRendering: true,
+        })
+      );
       expect(result).toBe(mockCanvas);
     });
 
@@ -78,7 +98,6 @@ describe('Export Image Utilities', () => {
   });
 
   describe('exportToPNG', () => {
-    let mockCreateElement: ReturnType<typeof vi.fn>;
     let mockLink: {
       click: ReturnType<typeof vi.fn>;
       download: string;
@@ -86,18 +105,28 @@ describe('Export Image Utilities', () => {
     };
 
     beforeEach(() => {
-      // Mock link element
+      // Mock link element for download
       mockLink = {
         click: vi.fn(),
         download: '',
         href: '',
       };
 
-      mockCreateElement = vi.fn(() => mockLink);
-      document.createElement = mockCreateElement as unknown as typeof document.createElement;
+      // Mock only anchor element creation for download
+      const origCreate = document.createElement.bind(document);
+      vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+        if (tagName === 'a') {
+          return mockLink as unknown as HTMLAnchorElement;
+        }
+        return origCreate(tagName);
+      });
 
       // Mock canvas methods
       mockCanvas.toDataURL = vi.fn(() => 'data:image/png;base64,mock');
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
     });
 
     it('should export element as PNG with default filename', async () => {
@@ -105,13 +134,16 @@ describe('Export Image Utilities', () => {
 
       await exportToPNG(mockElement);
 
-      expect(html2canvas).toHaveBeenCalledWith(mockElement, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-      });
+      expect(html2canvas).toHaveBeenCalledWith(
+        expect.any(HTMLElement),
+        expect.objectContaining({
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          foreignObjectRendering: true,
+        })
+      );
       expect(mockCanvas.toDataURL).toHaveBeenCalledWith('image/png');
-      expect(mockCreateElement).toHaveBeenCalledWith('a');
       expect(mockLink.download).toBe('shot-chart.png');
       expect(mockLink.href).toBe('data:image/png;base64,mock');
       expect(mockLink.click).toHaveBeenCalled();
