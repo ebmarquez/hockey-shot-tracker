@@ -30,7 +30,12 @@ const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick, isDeletable = fa
         minWidth: '44px',
         minHeight: '44px',
       }}
-      onClick={() => isDeletable && onClick?.(shot)}
+      onClick={(e) => {
+        if (isDeletable) {
+          e.stopPropagation();
+          onClick?.(shot);
+        }
+      }}
       title={isDeletable ? `Click to delete: ${shot.team} - ${shot.result} (${shot.shotType})` : `${shot.team} - ${shot.result} (${shot.shotType})`}
     >
       <div className="flex items-center justify-center w-full h-full">
