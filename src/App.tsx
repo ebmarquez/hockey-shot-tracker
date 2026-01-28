@@ -241,7 +241,7 @@ const GameView: React.FC = () => {
 
       <main className="max-w-2xl mx-auto px-4 py-4">
         {/* Team Cards */}
-        <div className="flex gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
           {/* Home Team Card */}
           <div className={`flex-1 rounded-xl p-4 transition-all ${
             state.selectedTeam === 'home' ? 'bg-red-100 ring-2 ring-red-400' : 'bg-red-50'
@@ -269,7 +269,7 @@ const GameView: React.FC = () => {
             
             <div className="mt-4">
               <div className="text-xs text-gray-500 mb-2">Current Period</div>
-              <div className="flex gap-4 sm:gap-8">
+              <div className="flex gap-3 sm:gap-8">
                 <div>
                   <div className="text-3xl sm:text-4xl font-bold text-red-400 tabular-nums">{homePeriodShots.length}</div>
                   <div className="text-xs text-gray-500">Shots</div>
@@ -343,7 +343,7 @@ const GameView: React.FC = () => {
             
             <div className="mt-4">
               <div className="text-xs text-gray-500 mb-2">Current Period</div>
-              <div className="flex gap-4 sm:gap-8">
+              <div className="flex gap-3 sm:gap-8">
                 <div>
                   <div className="text-3xl sm:text-4xl font-bold text-orange-400 tabular-nums">{awayPeriodShots.length}</div>
                   <div className="text-xs text-gray-500">Shots</div>
