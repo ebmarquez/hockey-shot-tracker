@@ -15,12 +15,18 @@ const ShotMarker: React.FC<ShotMarkerProps> = ({ shot, onClick, isDeletable = fa
   const strokeColor = isHome ? '#f87171' : '#94a3b8'; // red-400 / slate-400
   const fillColor = isGoal ? (isHome ? '#ef4444' : '#64748b') : 'transparent'; // red-500 / slate-500
 
+  // For vertical rink: transform horizontal rink coordinates to vertical screen coordinates
+  // Rink X (0-100, left to right) -> Screen Y (0-100, top to bottom)
+  // Rink Y (0-100, top to bottom) -> Screen X (0-100, left to right)
+  const screenLeft = shot.y;  // Rink Y becomes screen X
+  const screenTop = shot.x;   // Rink X becomes screen Y
+
   return (
     <div
       className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${isDeletable ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}`}
       style={{
-        left: `${shot.x}%`,
-        top: `${shot.y}%`,
+        left: `${screenLeft}%`,
+        top: `${screenTop}%`,
         minWidth: '44px',
         minHeight: '44px',
       }}

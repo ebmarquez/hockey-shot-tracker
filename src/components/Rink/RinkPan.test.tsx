@@ -131,7 +131,7 @@ describe('Rink Pan Gestures', () => {
       
       const svg = container.querySelector('svg');
       expect(svg).toBeTruthy();
-      expect(svg?.getAttribute('viewBox')).toBe('0 0 200 85');
+      expect(svg?.getAttribute('viewBox')).toBe('0 0 85 200');
     });
 
     it('should render shot markers overlay container', () => {

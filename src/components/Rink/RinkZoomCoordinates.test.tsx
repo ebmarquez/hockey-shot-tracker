@@ -131,6 +131,8 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
       const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
 
       // Click at 25% from left, 75% from top: (100 + 150, 100 + 225) = (250, 325)
+      // For vertical rink: screen X -> rink Y, screen Y -> rink X
+      // So screen (25%, 75%) becomes rink (75%, 25%)
       simulateClick(
         rinkElement,
         { left: 100, top: 100, width: 600, height: 300 },
@@ -138,8 +140,8 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
       );
 
       expect(mockOnShotLocation).toHaveBeenCalledWith(
-        expect.closeTo(25, 0.1),
-        expect.closeTo(75, 0.1)
+        expect.closeTo(75, 0.1),  // screen Y becomes rink X
+        expect.closeTo(25, 0.1)   // screen X becomes rink Y
       );
     });
   });
@@ -178,6 +180,8 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
       // - Original width/2: 600 / 2 = 300
       // - Original position: 300 - 150 = 150
       // - Percentage: 150 / 600 = 25%
+      // For vertical rink: screen X -> rink Y, screen Y -> rink X
+      // Screen (25%, 50%) becomes rink (50%, 25%)
       simulateClick(
         rinkElement,
         { left: 100, top: 100, width: 1200, height: 600 },
@@ -185,8 +189,8 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
       );
 
       expect(mockOnShotLocation).toHaveBeenCalledWith(
-        expect.closeTo(25, 0.1),
-        expect.closeTo(50, 0.1)
+        expect.closeTo(50, 0.1),  // screen Y becomes rink X
+        expect.closeTo(25, 0.1)   // screen X becomes rink Y
       );
     });
 
@@ -247,16 +251,22 @@ describe('Rink Zoom/Pan Coordinate Transformations', () => {
       const { container } = render(<Rink onShotLocation={mockOnShotLocation} />);
       const rinkElement = container.querySelector('.cursor-crosshair') as HTMLElement;
 
-      // Click near left edge
+      // Click near left edge (which maps to rink Y in vertical orientation)
+      // For vertical rink: screen X -> rink Y, screen Y -> rink X
+      // Click near left edge at center height: screen Y ~50% -> rink X ~50%
       simulateClick(
         rinkElement,
         { left: 100, top: 100, width: 1800, height: 900 },
         { x: 150, y: 550 }
       );
 
-      const [x] = mockOnShotLocation.mock.calls[0];
-      expect(x).toBeGreaterThanOrEqual(0);
-      expect(x).toBeLessThan(20); // Should be near left edge
+      const [x, y] = mockOnShotLocation.mock.calls[0];
+      // Screen Y at center (550) -> rink X ~50%
+      expect(x).toBeGreaterThanOrEqual(40);
+      expect(x).toBeLessThan(60);
+      // Screen X near left edge (150) -> rink Y near 0
+      expect(y).toBeGreaterThanOrEqual(0);
+      expect(y).toBeLessThan(20); // Should be near left edge -> low rink Y
     });
   });
 
