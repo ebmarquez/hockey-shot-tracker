@@ -522,7 +522,7 @@ const GameView: React.FC = () => {
                                 )}
                               </div>
                               <div className="text-sm text-gray-600 mt-1">
-                                {formatPeriodShort(shot.period)} • {formatTime(shot.timestamp)} • {shot.shotType} • {shot.result}
+                                {formatPeriodShort(shot.period)} • {formatTime(shot.timestamp)} • {shot.result}
                               </div>
                             </div>
                             <svg className="w-5 h-5 text-red-500 flex-shrink-0 ml-2" viewBox="0 0 24 24" fill="currentColor">

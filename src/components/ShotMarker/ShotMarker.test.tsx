@@ -17,7 +17,7 @@ describe('ShotMarker', () => {
 
   it('should render shot marker', () => {
     render(<ShotMarker shot={mockShot} />);
-    const marker = screen.getByTitle('home - save (wrist)');
+    const marker = screen.getByTitle('home - save');
     expect(marker).toBeInTheDocument();
   });
 
@@ -25,7 +25,7 @@ describe('ShotMarker', () => {
     const onClick = vi.fn();
     render(<ShotMarker shot={mockShot} onClick={onClick} isDeletable={true} />);
     
-    const marker = screen.getByTitle('Click to delete: home - save (wrist)');
+    const marker = screen.getByTitle('Click to delete: home - save');
     fireEvent.click(marker);
     
     expect(onClick).toHaveBeenCalledTimes(1);
@@ -36,7 +36,7 @@ describe('ShotMarker', () => {
     const onClick = vi.fn();
     render(<ShotMarker shot={mockShot} onClick={onClick} isDeletable={false} />);
     
-    const marker = screen.getByTitle('home - save (wrist)');
+    const marker = screen.getByTitle('home - save');
     fireEvent.click(marker);
     
     expect(onClick).not.toHaveBeenCalled();
@@ -52,7 +52,7 @@ describe('ShotMarker', () => {
       </div>
     );
     
-    const marker = screen.getByTitle('Click to delete: home - save (wrist)');
+    const marker = screen.getByTitle('Click to delete: home - save');
     fireEvent.click(marker);
     
     expect(onClick).toHaveBeenCalledTimes(1);
@@ -69,7 +69,7 @@ describe('ShotMarker', () => {
       </div>
     );
     
-    const marker = screen.getByTitle('home - save (wrist)');
+    const marker = screen.getByTitle('home - save');
     fireEvent.click(marker);
     
     expect(onClick).not.toHaveBeenCalled();
@@ -78,14 +78,14 @@ describe('ShotMarker', () => {
 
   it('should have pointer-events-auto class when deletable', () => {
     render(<ShotMarker shot={mockShot} isDeletable={true} />);
-    const marker = screen.getByTitle('Click to delete: home - save (wrist)');
+    const marker = screen.getByTitle('Click to delete: home - save');
     expect(marker.className).toContain('pointer-events-auto');
     expect(marker.className).toContain('cursor-pointer');
   });
 
   it('should have pointer-events-none class when not deletable', () => {
     render(<ShotMarker shot={mockShot} isDeletable={false} />);
-    const marker = screen.getByTitle('home - save (wrist)');
+    const marker = screen.getByTitle('home - save');
     expect(marker.className).toContain('pointer-events-none');
   });
 });
