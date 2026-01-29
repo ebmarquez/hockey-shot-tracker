@@ -389,35 +389,37 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
           <circle cx="64.5" cy="31" r="1" fill="#dc2626" />
           
           {/* Top zone faceoff circle hash marks (L-shaped)
-              The L-shape opens toward center ice, with short part pointing toward faceoff circle center
+              Per NHL/Hockey Canada rules: L-shaped marks with vertical lines (4 ft) parallel to boards
+              and horizontal lines (2 ft 10 in ≈ 3 ft in our scale) parallel to goal line
+              All L-shapes point TOWARD the nearest goal line (down for top circles)
               Left circle center at x=20.5, y=31
               Right circle center at x=64.5, y=31 */}
-          {/* Left circle hash marks - L opens right (toward center ice) */}
-          {/* Top-left hashmark */}
-          <line x1="18.5" y1="29" x2="18.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="18.5" y1="26" x2="20.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Top-right hashmark */}
-          <line x1="22.5" y1="29" x2="22.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="22.5" y1="26" x2="20.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Bottom-left hashmark */}
+          {/* Left circle hash marks - vertical lines at x=18.5 and x=22.5, 2ft from center at x=20.5 */}
+          {/* Top-left hashmark - L points down and inward */}
+          <line x1="18.5" y1="26" x2="18.5" y2="29" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="18.5" y1="29" x2="20.5" y2="29" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Top-right hashmark - L points down and inward */}
+          <line x1="22.5" y1="26" x2="22.5" y2="29" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="22.5" y1="29" x2="20.5" y2="29" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Bottom-left hashmark - L points down and inward */}
           <line x1="18.5" y1="33" x2="18.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="18.5" y1="36" x2="20.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Bottom-right hashmark */}
+          <line x1="18.5" y1="33" x2="20.5" y2="33" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Bottom-right hashmark - L points down and inward */}
           <line x1="22.5" y1="33" x2="22.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="22.5" y1="36" x2="20.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Right circle hash marks - L opens left (toward center ice) */}
-          {/* Top-left hashmark */}
-          <line x1="62.5" y1="29" x2="62.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="62.5" y1="26" x2="64.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Top-right hashmark */}
-          <line x1="66.5" y1="29" x2="66.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="66.5" y1="26" x2="64.5" y2="26" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Bottom-left hashmark */}
+          <line x1="22.5" y1="33" x2="20.5" y2="33" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Right circle hash marks - vertical lines at x=62.5 and x=66.5, 2ft from center at x=64.5 */}
+          {/* Top-left hashmark - L points down and inward */}
+          <line x1="62.5" y1="26" x2="62.5" y2="29" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="62.5" y1="29" x2="64.5" y2="29" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Top-right hashmark - L points down and inward */}
+          <line x1="66.5" y1="26" x2="66.5" y2="29" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="66.5" y1="29" x2="64.5" y2="29" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Bottom-left hashmark - L points down and inward */}
           <line x1="62.5" y1="33" x2="62.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="62.5" y1="36" x2="64.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Bottom-right hashmark */}
+          <line x1="62.5" y1="33" x2="64.5" y2="33" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Bottom-right hashmark - L points down and inward */}
           <line x1="66.5" y1="33" x2="66.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="66.5" y1="36" x2="64.5" y2="36" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="66.5" y1="33" x2="64.5" y2="33" stroke="#dc2626" strokeWidth="0.3" />
           
           {/* Bottom zone (home zone) faceoff circles */}
           <circle cx="20.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="0.5" />
@@ -428,34 +430,35 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
           <circle cx="64.5" cy="169" r="1" fill="#dc2626" />
           
           {/* Bottom zone faceoff circle hash marks (L-shaped)
+              All L-shapes point TOWARD the nearest goal line (up for bottom circles)
               Left circle center at x=20.5, y=169
               Right circle center at x=64.5, y=169 */}
-          {/* Left circle hash marks - L opens right (toward center ice) */}
-          {/* Top-left hashmark */}
+          {/* Left circle hash marks */}
+          {/* Top-left hashmark - L points up and inward */}
           <line x1="18.5" y1="167" x2="18.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="18.5" y1="164" x2="20.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Top-right hashmark */}
+          <line x1="18.5" y1="167" x2="20.5" y2="167" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Top-right hashmark - L points up and inward */}
           <line x1="22.5" y1="167" x2="22.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="22.5" y1="164" x2="20.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Bottom-left hashmark */}
+          <line x1="22.5" y1="167" x2="20.5" y2="167" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Bottom-left hashmark - L points up and inward */}
           <line x1="18.5" y1="171" x2="18.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="18.5" y1="174" x2="20.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Bottom-right hashmark */}
+          <line x1="18.5" y1="171" x2="20.5" y2="171" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Bottom-right hashmark - L points up and inward */}
           <line x1="22.5" y1="171" x2="22.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="22.5" y1="174" x2="20.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Right circle hash marks - L opens left (toward center ice) */}
-          {/* Top-left hashmark */}
+          <line x1="22.5" y1="171" x2="20.5" y2="171" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Right circle hash marks */}
+          {/* Top-left hashmark - L points up and inward */}
           <line x1="62.5" y1="167" x2="62.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="62.5" y1="164" x2="64.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Top-right hashmark */}
+          <line x1="62.5" y1="167" x2="64.5" y2="167" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Top-right hashmark - L points up and inward */}
           <line x1="66.5" y1="167" x2="66.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="66.5" y1="164" x2="64.5" y2="164" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Bottom-left hashmark */}
+          <line x1="66.5" y1="167" x2="64.5" y2="167" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Bottom-left hashmark - L points up and inward */}
           <line x1="62.5" y1="171" x2="62.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="62.5" y1="174" x2="64.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
-          {/* Bottom-right hashmark */}
+          <line x1="62.5" y1="171" x2="64.5" y2="171" stroke="#dc2626" strokeWidth="0.3" />
+          {/* Bottom-right hashmark - L points up and inward */}
           <line x1="66.5" y1="171" x2="66.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
-          <line x1="66.5" y1="174" x2="64.5" y2="174" stroke="#dc2626" strokeWidth="0.3" />
+          <line x1="66.5" y1="171" x2="64.5" y2="171" stroke="#dc2626" strokeWidth="0.3" />
           
           {/* Neutral zone faceoff spots - 2 ft diameter, located 5 ft from blue lines
               Top neutral zone: y = 75 - 5 = 70
@@ -470,9 +473,9 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
               8 ft wide (4 ft from each goal post), with 4 ft straight sides
               then 6 ft radius arc connecting them
               Goal is 6 ft wide centered at x=42.5, goal line at y=11
-              Crease extends 6 ft from goal line (to y=5) */}
+              Crease extends 6 ft IN FRONT of goal line into playing surface (to y=17) */}
           <path 
-            d="M 38.5 11 L 38.5 7 A 6 6 0 0 1 46.5 7 L 46.5 11" 
+            d="M 38.5 11 L 38.5 15 A 6 6 0 0 0 46.5 15 L 46.5 11" 
             fill="#60a5fa" 
             fillOpacity="0.3" 
             stroke="#dc2626" 
@@ -482,9 +485,9 @@ const Rink: React.FC<RinkProps> = ({ onShotLocation, children, homeTeamName, awa
           {/* Goal crease - Bottom (home zone)
               8 ft wide (4 ft from each goal post), with 4 ft straight sides
               then 6 ft radius arc connecting them
-              Goal line at y=189, crease extends to y=195 */}
+              Goal line at y=189, crease extends IN FRONT of goal line into playing surface (to y=183) */}
           <path 
-            d="M 38.5 189 L 38.5 193 A 6 6 0 0 0 46.5 193 L 46.5 189" 
+            d="M 38.5 189 L 38.5 185 A 6 6 0 0 1 46.5 185 L 46.5 189" 
             fill="#60a5fa" 
             fillOpacity="0.3" 
             stroke="#dc2626" 
