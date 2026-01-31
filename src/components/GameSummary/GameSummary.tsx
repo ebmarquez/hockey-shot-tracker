@@ -112,67 +112,115 @@ const TeamShotMap: React.FC<{ shots: Shot[]; team: Team; teamName: string }> = (
           className="w-full h-auto"
           preserveAspectRatio="xMidYMid meet"
         >
-          {/* Ice surface with gradient - vertical orientation */}
+          {/* Ice surface with gradient and texture - vertical orientation */}
           <defs>
             <linearGradient id={`ice-gradient-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" style={{ stopColor: '#e8f4f8', stopOpacity: 1 }} />
               <stop offset="50%" style={{ stopColor: '#ffffff', stopOpacity: 1 }} />
               <stop offset="100%" style={{ stopColor: '#e8f4f8', stopOpacity: 1 }} />
             </linearGradient>
+            
+            {/* Ice texture pattern */}
+            <pattern id={`ice-texture-${uniqueId}`} x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+              <rect width="20" height="20" fill={`url(#ice-gradient-${uniqueId})`} />
+              <circle cx="10" cy="10" r="0.3" fill="#d0e7f0" opacity="0.3" />
+            </pattern>
+            
+            {/* Clip path for ice surface within boards (28 ft corner radius) */}
+            <clipPath id={`rink-clip-${uniqueId}`}>
+              <rect x="0" y="0" width="85" height="200" rx="28" ry="28" />
+            </clipPath>
           </defs>
           
-          {/* Ice surface - full rink (we'll clip via viewBox) */}
-          <rect x="0" y="0" width="85" height="200" fill={`url(#ice-gradient-${uniqueId})`} />
+          {/* Ice surface - full rink with texture, clipped to rink shape */}
+          <rect x="0" y="0" width="85" height="200" fill={`url(#ice-texture-${uniqueId})`} clipPath={`url(#rink-clip-${uniqueId})`} />
           
-          {/* Boards (outer boundary) */}
-          <rect x="0" y="0" width="85" height="200" fill="none" stroke="#1e3a8a" strokeWidth="1.2" rx="4" />
+          {/* Boards (outer boundary) - 28 ft corner radius */}
+          <rect x="0" y="0" width="85" height="200" fill="none" stroke="#1e3a8a" strokeWidth="2" rx="28" ry="28" />
           
-          {/* Center red line - horizontal in vertical rink */}
-          <rect x="0" y="98.5" width="85" height="3" fill="#dc2626" />
+          {/* Center red line - at 100 ft (center), 1 ft wide */}
+          <rect x="1" y="99.5" width="83" height="1" fill="#dc2626" />
           
-          {/* Blue lines - horizontal in vertical rink */}
-          <rect x="0" y="58.5" width="85" height="2.5" fill="#2563eb" />
-          <rect x="0" y="139" width="85" height="2.5" fill="#2563eb" />
+          {/* Blue lines - 75 ft from each end, 1 ft wide */}
+          <rect x="1" y="74.5" width="83" height="1" fill="#2563eb" />
+          <rect x="1" y="124.5" width="83" height="1" fill="#2563eb" />
           
-          {/* Goal lines (thin red) - horizontal in vertical rink */}
-          <rect x="0" y="10.5" width="85" height="1" fill="#dc2626" />
-          <rect x="0" y="188.5" width="85" height="1" fill="#dc2626" />
+          {/* Goal lines - 11 ft from end boards, 2 inches wide (~0.2 ft) - clipped for rounded corners */}
+          <rect x="7" y="10.9" width="71" height="0.2" fill="#dc2626" />
+          <rect x="7" y="188.9" width="71" height="0.2" fill="#dc2626" />
           
-          {/* Center ice circle */}
-          <circle cx="42.5" cy="100" r="15" fill="none" stroke="#2563eb" strokeWidth="1" />
-          <circle cx="42.5" cy="100" r="1" fill="#2563eb" />
+          {/* Center ice circle - 30 ft diameter = 15 ft radius */}
+          <circle cx="42.5" cy="100" r="15" fill="none" stroke="#2563eb" strokeWidth="0.5" />
           
-          {/* Top zone faceoff circles (for away team view) */}
-          <circle cx="20.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
-          <circle cx="64.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          {/* Center faceoff spot - 12 inches (1 ft) diameter */}
+          <circle cx="42.5" cy="100" r="0.5" fill="#2563eb" />
           
-          {/* Bottom zone faceoff circles (for home team view) */}
-          <circle cx="20.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
-          <circle cx="64.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="1" />
+          {/* End zone faceoff circles - 30 ft diameter = 15 ft radius */}
+          {/* Top zone (away zone) faceoff circles */}
+          <circle cx="20.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="0.5" />
+          <circle cx="64.5" cy="31" r="15" fill="none" stroke="#dc2626" strokeWidth="0.5" />
           
-          {/* Goal crease - Top (for away team view) */}
+          {/* Top zone faceoff spots - 2 ft diameter = 1 ft radius */}
+          <circle cx="20.5" cy="31" r="1" fill="#dc2626" />
+          <circle cx="64.5" cy="31" r="1" fill="#dc2626" />
+          
+          {/* Bottom zone (home zone) faceoff circles */}
+          <circle cx="20.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="0.5" />
+          <circle cx="64.5" cy="169" r="15" fill="none" stroke="#dc2626" strokeWidth="0.5" />
+          
+          {/* Bottom zone faceoff spots */}
+          <circle cx="20.5" cy="169" r="1" fill="#dc2626" />
+          <circle cx="64.5" cy="169" r="1" fill="#dc2626" />
+          
+          {/* Neutral zone faceoff spots - 2 ft diameter */}
+          <circle cx="20.5" cy="70" r="1" fill="#dc2626" />
+          <circle cx="64.5" cy="70" r="1" fill="#dc2626" />
+          <circle cx="20.5" cy="130" r="1" fill="#dc2626" />
+          <circle cx="64.5" cy="130" r="1" fill="#dc2626" />
+          
+          {/* Goal crease - Top (away zone)
+              8 ft wide with 4 ft straight sides and 6 ft radius arc */}
           <path 
-            d="M 37 11 L 37 5 Q 42.5 5 42.5 5 Q 48 5 48 5 L 48 11 Z" 
+            d="M 38.5 11 L 38.5 15 A 6 6 0 0 0 46.5 15 L 46.5 11" 
             fill="#60a5fa" 
-            fillOpacity="0.4" 
-            stroke="#2563eb" 
-            strokeWidth="1"
+            fillOpacity="0.3" 
+            stroke="#dc2626" 
+            strokeWidth="0.3"
           />
           
-          {/* Goal crease - Bottom (for home team view) */}
+          {/* Goal crease - Bottom (home zone) */}
           <path 
-            d="M 37 189 L 37 195 Q 42.5 195 42.5 195 Q 48 195 48 195 L 48 189 Z" 
+            d="M 38.5 189 L 38.5 185 A 6 6 0 0 1 46.5 185 L 46.5 189" 
             fill="#60a5fa" 
-            fillOpacity="0.4" 
-            stroke="#2563eb" 
-            strokeWidth="1"
+            fillOpacity="0.3" 
+            stroke="#dc2626" 
+            strokeWidth="0.3"
           />
           
-          {/* Goal - Top (for away team view) */}
-          <rect x="39.5" y="8.5" width="6" height="2.5" fill="none" stroke="#1f2937" strokeWidth="0.8" />
+          {/* Goal - Top (away zone)
+              6 ft wide, 3.33 ft deep */}
+          <rect x="39.5" y="7.67" width="6" height="3.33" fill="none" stroke="#1f2937" strokeWidth="0.5" />
           
-          {/* Goal - Bottom (for home team view) */}
-          <rect x="39.5" y="189" width="6" height="2.5" fill="none" stroke="#1f2937" strokeWidth="0.8" />
+          {/* Goal - Bottom (home zone) */}
+          <rect x="39.5" y="189" width="6" height="3.33" fill="none" stroke="#1f2937" strokeWidth="0.5" />
+          
+          {/* Trapezoid behind goals - Top (away zone) */}
+          <path 
+            d="M 33.5 11 L 28.5 0 L 56.5 0 L 51.5 11" 
+            fill="none" 
+            stroke="#dc2626" 
+            strokeWidth="0.3"
+            opacity="0.7"
+          />
+          
+          {/* Trapezoid behind goals - Bottom (home zone) */}
+          <path 
+            d="M 33.5 189 L 28.5 200 L 56.5 200 L 51.5 189" 
+            fill="none" 
+            stroke="#dc2626" 
+            strokeWidth="0.3"
+            opacity="0.7"
+          />
         </svg>
         
         {/* Shot markers overlay */}
